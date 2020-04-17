@@ -1,14 +1,15 @@
 #ifndef PARABOLIC
 #define PARABOLIC
 
-#include "AbstractFunction.hpp"
+#include "Function1D.hpp"
+#include "Function2D.hpp"
 
 class Parabolic {
 
   public:
     // Constructor
     Parabolic(const double A, const double time, const double g_0,
-      const double g_1, AbstractFunction& InitialU, AbstractFunction& ExactU,
+      const double g_1, Function1D& InitialU, Function2D& ExactU,
       const int N, const int L);
 
     // Destructor
@@ -18,6 +19,11 @@ class Parabolic {
     void constructMatrix();
 
     void ShowMatrix();
+
+    void Approximate();
+
+    void ShowApprox();
+    void ShowExact();
 
 
 
@@ -29,8 +35,8 @@ class Parabolic {
     double g0; // u(t,0) boundary condition at x=0
     double g1; // u(t,1) boundary condition at x=1
 
-    AbstractFunction* mInitialU; // u_0 initial condition
-    AbstractFunction* mExactU; // exact u function
+    Function1D* mInitialU; // u_0 initial condition
+    Function2D* mExactU; // exact u function
     double* uApprox; // Final approximation for u
 
     // Discretisation choices

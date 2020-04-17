@@ -1,16 +1,16 @@
-#ifndef ABSTRACTFUNCTION
-#define ABSTRACTFUNCTION
+#ifndef FUNCTION1D
+#define FUNCTION1D
 
 /* Class which specifies a function f(x) and its derivative f'(x) */
 
-class AbstractFunction {
+class Function1D {
   public:
 
     // f(x)
     virtual double evaluate(double x) = 0;
 
     // Destructor
-    virtual ~AbstractFunction() = 0;
+    virtual ~Function1D() = 0;
 };
 
 #endif

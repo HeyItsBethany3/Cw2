@@ -107,8 +107,8 @@ void Elliptic::SolveSystem() {
   }
 
   // Deallocates storage
-  delete[] delta;
-  delete[] Gvec;
+  delete delta;
+  delete Gvec;
 }
 
 void Elliptic::ShowApprox() {

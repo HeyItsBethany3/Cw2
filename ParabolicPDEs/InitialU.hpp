@@ -1,14 +1,14 @@
-#include "AbstractFunction.hpp"
+#include "Function1D.hpp"
 
 // This function specifies the initial condition for u in our PDE problem
-class Function1: public AbstractFunction {
+class InitialU: public Function1D {
 
   public:
     // Constructor
-    Function1();
+    InitialU();
 
     // Destructor
-    ~Function1();
+    ~InitialU();
 
     // f(x)
     double evaluate(double x);
