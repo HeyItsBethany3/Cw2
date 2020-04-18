@@ -6,12 +6,13 @@
 int main(int argc, char* argv[]) {
 
   Function1 *f1 = new Function1();
-  Elliptic *PDE = new Elliptic(0,1,*f1,10);
+  Elliptic *PDE = new Elliptic(0,1,*f1,100);
   (*PDE).FindSystem();
   //(*PDE).ShowSystem();
   (*PDE).SolveSystem();
-  (*PDE).ShowApprox();
-  (*PDE).ShowExact();
+  //(*PDE).ShowApprox();
+  //(*PDE).ShowExact();
+  (*PDE).Norm();
 
 
   // Deallocate storage

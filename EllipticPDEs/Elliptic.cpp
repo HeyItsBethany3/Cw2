@@ -47,8 +47,8 @@ void Elliptic::FindSystem() {
   // Constructs F vector
   const int m = n-1;
   double factor = pow(h,2);
-  mFvec[0] = alpha-(factor*(*mFunction).evaluateF(mNodes[0]));
-  mFvec[m-1] = beta -(factor*(*mFunction).evaluateF(mNodes[m-1]));
+  mFvec[0] = -alpha-(factor*(*mFunction).evaluateF(mNodes[0]));
+  mFvec[m-1] = -beta -(factor*(*mFunction).evaluateF(mNodes[m-1]));
   for(int i=1; i<m-1; i++) {
     mFvec[i] = -(factor*(*mFunction).evaluateF(mNodes[i]));
   }
@@ -127,6 +127,16 @@ void Elliptic::ShowExact() {
   std::cout << std::endl;
 }
 
+// Shows the grid norm
+void Elliptic::Norm() {
+  double sum = 0;
+  for(int i=0; i<n-1; i++) {
+    sum = sum +  fabs(uApprox[i]-(*mFunction).exactU(mNodes[i]));
+  }
+  sum = sqrt(sum *h);
+  std::cout << "\nGrid norm: " << sum << "\n";
+
+}
 
 Elliptic::~Elliptic() {
   delete mNodes;

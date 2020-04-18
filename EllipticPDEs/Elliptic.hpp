@@ -1,3 +1,4 @@
+
 #ifndef ELLIPTIC
 #define ELLIPTIC
 
@@ -25,6 +26,7 @@ class Elliptic {
 
     void ShowApprox(); // Show approximation to problem
     void ShowExact(); // Show exact solution
+    void Norm(); // Grid norm
 
   protected:
     double alpha; // alpha
@@ -40,7 +42,6 @@ class Elliptic {
     double *mFvec; // Fvec
 
     double *uApprox; // U vector (solution)
-
     AbstractFunction* mFunction; // Function pointer to f
 
 };
