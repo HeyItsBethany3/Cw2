@@ -17,6 +17,7 @@ compile: ${file1}.cpp ${file2}.cpp ${file3}.cpp ${file4}.cpp
 
 run: Execute
 	./Execute
+	rm *.o Execute
 
 clean:
 	rm *.o Execute

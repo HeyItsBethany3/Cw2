@@ -10,12 +10,13 @@ int main(int argc, char* argv[]) {
 
   InitialU *u0 = new InitialU(); // u_0 (initial condition)
   ExactU *uExact = new ExactU(); // exact u function
-  Parabolic *PDE = new Parabolic(pow(M_PI,-2), 1,0,1,*u0, *uExact, 10, 2);
+  Parabolic *PDE = new Parabolic(pow(M_PI,-2), 1,0,1,*u0, *uExact, 100, 10000);
   (*PDE).constructMatrix();
   //(*PDE).ShowMatrix();
   (*PDE).Approximate();
-  (*PDE).ShowApprox();
-  (*PDE).ShowExact();
+  //(*PDE).ShowApprox();
+  //(*PDE).ShowExact();
+  (*PDE).Norm();
 
 
   // Deallocate storage

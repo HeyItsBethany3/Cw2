@@ -75,14 +75,16 @@ void Parabolic::Approximate() {
   uApproxOld = new double[m];
   double* uApproxNew;
   uApproxNew = new double[m];
+  double lamda = ((a*deltaT)/double(pow(h,2)));
 
   for(int j=0; j<m; j++) {
     uApproxOld[j] = (*mInitialU).evaluate(xNodes[j]);
-    uApproxNew[j] = uApproxOld[j];
+    uApproxOld[0] += lamda*g0;
+    uApproxOld[m-1] += lamda*g1;
+    //uApproxNew[j] = uApproxOld[j];
   }
 
-  //for(int i=1; i<=l; i++) {
-  for(int i=1; i<3; i++) {
+  for(int i=1; i<=l; i++) {
 
     // Solve tridiagonal system of equations A u_n+1 = u_n
     double *delta;
@@ -109,9 +111,11 @@ void Parabolic::Approximate() {
     // Deallocates storage
     delete delta;
 
-    // Update old vector for next iteration
+    // Update old vector for next iteration (and add boundary conditions)
     for(int i=0; i<m; i++) {
       uApproxOld[i] = uApproxNew[i];
+      uApproxOld[0] += lamda*g0;
+      uApproxOld[m-1] += lamda*g1;
     }
 
   }
@@ -141,6 +145,18 @@ void Parabolic::ShowExact() {
     std::cout << (*mExactU).evaluate(xNodes[i],T) << " ";
   }
   std::cout << std::endl;
+
+}
+
+
+// Shows the grid norm
+void Parabolic::Norm() {
+  double sum = 0;
+  for(int i=0; i<n-1; i++) {
+    sum = sum +  fabs(uApprox[i]-(*mExactU).evaluate(xNodes[i], T));
+  }
+  sum = sqrt(sum *h);
+  std::cout << "\nGrid norm: " << sum << "\n";
 
 }
 
