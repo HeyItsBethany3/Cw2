@@ -24,7 +24,8 @@ class Parabolic {
 
     void ShowApprox();
     void ShowExact();
-    void Norm(); // Shows grid norm 
+    void ShowError(); // Show errors
+    void Norm(); // Shows grid norm
 
 
 

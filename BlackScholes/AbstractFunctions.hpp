@@ -17,7 +17,7 @@ class AbstractFunctions {
     virtual double f0(double t) = 0;
 
     // Destructor
-    virtual ~AbstractFunction() = 0;
+    virtual ~AbstractFunctions() = 0;
 
   protected:
     double K; // strike price

@@ -1,3 +1,5 @@
+#ifndef FUNCTIONS
+#define FUNCTIONS
 #include "AbstractFunctions.hpp"
 
 class Functions: public AbstractFunctions {
@@ -19,3 +21,5 @@ class Functions: public AbstractFunctions {
     double f0(double t);
 
 };
+
+#endif

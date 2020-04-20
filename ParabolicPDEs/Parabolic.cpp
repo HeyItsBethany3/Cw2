@@ -79,10 +79,9 @@ void Parabolic::Approximate() {
 
   for(int j=0; j<m; j++) {
     uApproxOld[j] = (*mInitialU).evaluate(xNodes[j]);
-    uApproxOld[0] += lamda*g0;
-    uApproxOld[m-1] += lamda*g1;
-    //uApproxNew[j] = uApproxOld[j];
   }
+  uApproxOld[0] += lamda*g0;
+  uApproxOld[m-1] += lamda*g1;
 
   for(int i=1; i<=l; i++) {
 
@@ -114,9 +113,9 @@ void Parabolic::Approximate() {
     // Update old vector for next iteration (and add boundary conditions)
     for(int i=0; i<m; i++) {
       uApproxOld[i] = uApproxNew[i];
-      uApproxOld[0] += lamda*g0;
-      uApproxOld[m-1] += lamda*g1;
     }
+    uApproxOld[0] += lamda*g0;
+    uApproxOld[m-1] += lamda*g1;
 
   }
 
@@ -147,7 +146,13 @@ void Parabolic::ShowExact() {
   std::cout << std::endl;
 
 }
-
+void Parabolic::ShowError() {
+  std::cout << "Error: ";
+  for(int i=0; i<m; i++) {
+    std::cout << fabs(uApprox[i]-(*mExactU).evaluate(xNodes[i], T)) << " ";
+  }
+  std::cout << std::endl;
+}
 
 // Shows the grid norm
 void Parabolic::Norm() {
