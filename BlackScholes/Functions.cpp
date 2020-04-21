@@ -1,5 +1,6 @@
 #include "Functions.hpp"
 #include<cmath>
+#include<iostream>
 
 // Constructor
 Functions::Functions(const double strike, const double interest, const double sigma) {

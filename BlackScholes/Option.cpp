@@ -20,11 +20,10 @@ Option::Option(const double strike, const double interest, const double sigma,
         deltaT = T/double(l);
 
         xNodes = new double[m];
-        h = 1/double(N); // spatial step-size
+        h = R/double(N); // spatial step-size
         for(int i=0; i<m; i++) {
           xNodes[i]=(i+1)*h;
         }
-
 
         mDiag = new double[m];
         mUpper = new double[m-1];
@@ -45,23 +44,25 @@ Option::~Option() {
 // Construct matrix A
 void Option::ConstructMatrix() {
 
+  double val;
 
   // Diagonal elements of A
   for (int i=0; i<m; i++) {
-    double lamda = xNodes[i]/h;
-    mDiag[i] = 1+(r*deltaT)+(r*deltaT*lamda)+(pow(vol,2)*pow(lamda,2));
+    val = 1+(r*deltaT)+((r*deltaT*xNodes[i])/double(h));
+    val += ((pow(vol,2)*pow(xNodes[i],2)*deltaT)/double(pow(h,2)));
+    mDiag[i] = val;
   }
 
   // Construct upper diagonal elements of A
   for (int i=0; i<m-1; i++) {
-    double lamda = xNodes[i]/h;
-    mUpper[i]=-((pow(vol,2)*pow(lamda,2))/double(2))-(r*lamda);
+    val = -((pow(vol,2)*pow(xNodes[i],2)*deltaT)/double(h*2));
+    val += -((r*xNodes[i]*deltaT)/double(h));
+    mUpper[i] = val;
   }
 
   // Construct lower diagonal elements of A
   for (int i=1; i<m; i++) {
-    double lamda = xNodes[i]/h;
-    mLower[i]=-(pow(vol,2)*pow(lamda,2)*deltaT)/double(2);
+    mLower[i-1]= -((pow(vol,2)*pow(xNodes[i],2)*deltaT)/double(2*pow(h,2)));
   }
 }
 
@@ -87,7 +88,8 @@ void Option::ShowMatrix() {
 
 // Solve problem
 void Option::Approximate() {
-  double t = deltaT; // Is this right?
+  double t = deltaT;
+
   double* uApproxOld;
   uApproxOld = new double[m];
   double* uApproxNew;
@@ -96,10 +98,11 @@ void Option::Approximate() {
   for(int j=0; j<m; j++) {
     uApproxOld[j] = (*mFunction).payoff(xNodes[j]);
   }
-  double factor1 = -((pow(vol,2)*pow((xNodes[0]/h),2)*deltaT)/double(2));
+  double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
   uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
-  double factor2 = -((pow(vol,2)*pow((xNodes[m-1]/h),2))/double(2))-(r*(xNodes[m-1]/h));
-  uApproxOld[m-1] += -(factor2 * (*mFunction).exactU(xNodes[m-1], t));
+  double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(h*2));
+  factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
+  uApproxOld[m-1] += -(factor2 * (*mFunction).exactU(R, t));
 
   for(int i=1; i<=l; i++) {
 
@@ -135,10 +138,11 @@ void Option::Approximate() {
     for(int i=0; i<m; i++) {
       uApproxOld[i] = uApproxNew[i];
     }
-    double factor1 = -((pow(vol,2)*pow((xNodes[0]/h),2)*deltaT)/double(2));
+    double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
     uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
-    double factor2 = -((pow(vol,2)*pow((xNodes[m-1]/h),2))/double(2))-(r*(xNodes[m-1]/h));
-    uApproxOld[m-1] += -(factor2 * (*mFunction).exactU(xNodes[m-1], t));
+    double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(h*2));
+    factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
+    uApproxOld[m-1] += -(factor2 * (*mFunction).exactU(R, t));
 
   }
 

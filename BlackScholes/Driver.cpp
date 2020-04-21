@@ -6,10 +6,10 @@
 int main(int argc, char* argv[]) {
 
   Functions* f1 = new Functions(100, 0, 0.5);
-  Option* option = new Option(100, 0, 0.5, 5, 300, *f1, 10, 10);
+  Option* option = new Option(100, 0, 0.5, 5, 300, *f1, 10, 5);
 
   (*option).ConstructMatrix();
-  //(*option).ShowMatrix();
+  (*option).ShowMatrix();
   (*option).Approximate();
 
   (*option).ShowApprox();
