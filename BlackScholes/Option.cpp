@@ -17,7 +17,7 @@ Option::Option(const double strike, const double interest, const double sigma,
         n=N;
         m=N-1;
         l=L;
-        deltaT = T/double(l);
+        deltaT = T/double(l); // time step-size
 
         xNodes = new double[m];
         h = R/double(N); // spatial step-size
@@ -49,13 +49,13 @@ void Option::ConstructMatrix() {
   // Diagonal elements of A
   for (int i=0; i<m; i++) {
     val = 1+(r*deltaT)+((r*deltaT*xNodes[i])/double(h));
-    val += ((pow(vol,2)*pow(xNodes[i],2)*deltaT)/double(pow(h,2)));
+    val = val + ((pow(vol,2)*pow(xNodes[i],2)*deltaT)/double(pow(h,2)));
     mDiag[i] = val;
   }
 
   // Construct upper diagonal elements of A
   for (int i=0; i<m-1; i++) {
-    val = -((pow(vol,2)*pow(xNodes[i],2)*deltaT)/double(h*2));
+    val = -((pow(vol,2)*pow(xNodes[i],2)*deltaT)/double(pow(h,2)*2));
     val += -((r*xNodes[i]*deltaT)/double(h));
     mUpper[i] = val;
   }
@@ -65,6 +65,8 @@ void Option::ConstructMatrix() {
     mLower[i-1]= -((pow(vol,2)*pow(xNodes[i],2)*deltaT)/double(2*pow(h,2)));
   }
 }
+
+
 
 // Displays system to solve
 void Option::ShowMatrix() {
@@ -100,7 +102,7 @@ void Option::Approximate() {
   }
   double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
   uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
-  double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(h*2));
+  double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
   factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
   uApproxOld[m-1] += -(factor2 * (*mFunction).exactU(R, t));
 
@@ -140,7 +142,7 @@ void Option::Approximate() {
     }
     double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
     uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
-    double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(h*2));
+    double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
     factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
     uApproxOld[m-1] += -(factor2 * (*mFunction).exactU(R, t));
 
@@ -175,14 +177,14 @@ void Option::ShowExact() {
 
 void Option::ShowError() {
   std::cout << "Error: ";
-  for(int i=0; i<m; i++) {
+  for(int i=0; i<5; i++) {
     std::cout << fabs(uApprox[i]-(*mFunction).exactU(xNodes[i], T)) << " ";
   }
   std::cout << std::endl;
 }
 
 // Shows the grid norm
-void Option::Norm() {
+void Option::ShowNorm() {
   double sum = 0;
   for(int i=0; i<n-1; i++) {
     sum = sum +  fabs(uApprox[i]-(*mFunction).exactU(xNodes[i], T));

@@ -27,7 +27,7 @@ class Option {
     void ShowApprox(); // Shows approximation
     void ShowExact(); // Show exact values
     void ShowError(); // Show errors
-    void Norm(); // Shows grid function norm
+    void ShowNorm(); // Shows grid function norm
 
 
 
