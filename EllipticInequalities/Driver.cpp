@@ -6,9 +6,11 @@
 int main(int argc, char* argv[]) {
 
   Function1 *f1 = new Function1();
-  Elliptic *PDE = new Elliptic(0,0,*f1,16, 1.8);
+  //Elliptic *PDE = new Elliptic(0,0,*f1,16, 1.8);
+  Elliptic *PDE = new Elliptic(0,0,*f1,3, 1.8);
   (*PDE).FindSystem();
-  (*PDE).SolveSystem(100);
+  (*PDE).ShowSystem();
+  (*PDE).SolveSystem(20);
   (*PDE).ShowApprox();
   (*PDE).ShowExact();
 

@@ -26,7 +26,11 @@ class Elliptic {
 
     void ShowApprox(); // Show approximation to problem
     void ShowExact(); // Show exact solution
-    void Norm(); // Grid norm
+    void ShowNorm(); // Grid norm
+
+    double GetNorm();
+
+    void PlotApproximation();
 
   protected:
     double alpha; // alpha
@@ -43,6 +47,7 @@ class Elliptic {
 
     double *uApprox; // U vector (solution)
     AbstractFunction* mFunction; // Function pointer to f
+
 
 };
 

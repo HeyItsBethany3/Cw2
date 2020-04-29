@@ -32,28 +32,28 @@ void Elliptic::Nodes() {
 }
 
 void Elliptic::FindSystem() {
-  // Find diagonal elements of B
+  // Find diagonal elements of A
   for (int i=0; i<n-1; i++) {
-    mDiag[i] = -2;
+    mDiag[i] = 2;
   }
 
   // Construct upper diagonal elements of A
   for (int i=0; i<n-2; i++) {
-    mUpper[i]=1;
+    mUpper[i]=-1;
   }
 
   // Construct lower diagonal elements of A
   for (int i=0; i<n-2; i++) {
-    mLower[i]=1;
+    mLower[i]=-1;
   }
 
   // Constructs F vector
   const int m = n-1;
   double factor = pow(h,2);
-  mFvec[0] = -alpha-(factor*(*mFunction).f(mNodes[0]));
-  mFvec[m-1] = -beta -(factor*(*mFunction).f(mNodes[m-1]));
+  mFvec[0] = alpha+(factor*(*mFunction).f(mNodes[0]));
+  mFvec[m-1] = beta +(factor*(*mFunction).f(mNodes[m-1]));
   for(int i=1; i<m-1; i++) {
-    mFvec[i] = -(factor*(*mFunction).f(mNodes[i]));
+    mFvec[i] = (factor*(*mFunction).f(mNodes[i]));
   }
 
 }

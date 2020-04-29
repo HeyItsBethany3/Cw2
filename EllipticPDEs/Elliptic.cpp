@@ -2,6 +2,7 @@
 #include "AbstractFunction.hpp"
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 // n=m+1 mesh points, h=1/n
 Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction, const int meshPoints) {
@@ -52,6 +53,7 @@ void Elliptic::FindSystem() {
   for(int i=1; i<m-1; i++) {
     mFvec[i] = -(factor*(*mFunction).evaluateF(mNodes[i]));
   }
+
 
 }
 
@@ -128,7 +130,7 @@ void Elliptic::ShowExact() {
 }
 
 // Shows the grid norm
-void Elliptic::Norm() {
+void Elliptic::ShowNorm() {
   double sum = 0;
   for(int i=0; i<n-1; i++) {
     sum = sum +  fabs(uApprox[i]-(*mFunction).exactU(mNodes[i]));
@@ -137,6 +139,40 @@ void Elliptic::Norm() {
   std::cout << "\nGrid norm: " << sum << "\n";
 
 }
+double Elliptic::GetNorm() {
+  double sum = 0;
+  for(int i=0; i<n-1; i++) {
+    sum = sum +  fabs(uApprox[i]-(*mFunction).exactU(mNodes[i]));
+  }
+  sum = sqrt(sum *h);
+  return sum;
+}
+
+void Elliptic::PlotApproximation() {
+  std::ofstream file;
+  file.open("EllipticPlot.csv");
+  assert(file.is_open());
+
+  // x values
+  for(int i=0; i<n-1; i++) {
+    file << mNodes[i] << ",";
+  }
+  file << std::endl;
+
+  // Approximation
+  for(int i=0; i<n-1; i++) {
+    file << uApprox[i] << ",";
+  }
+  file << std::endl;
+
+  // Exact solution
+  for(int i=0; i<n-1; i++) {
+    file << (*mFunction).exactU(mNodes[i]) << ",";
+  }
+  file.close();
+  system("cp EllipticPlot.csv ../../../MATLAB/");
+}
+
 
 Elliptic::~Elliptic() {
   delete mNodes;
