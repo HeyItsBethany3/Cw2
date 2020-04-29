@@ -9,9 +9,6 @@ class AbstractFunction {
     // f(x)
     virtual double f(double x) = 0;
 
-    // Exact value for u(x)
-    virtual double exactU(double x) = 0;
-
     // Psi(x)
     virtual double psi(double x) = 0;
 

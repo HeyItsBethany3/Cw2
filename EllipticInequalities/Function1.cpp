@@ -10,9 +10,6 @@ double Function1::f(double x) {
   return double(50)/double(3);
 }
 
-double Function1::exactU(double x) {
-  return (x-sin(M_PI*x));
-}
 
 double Function1::psi(double x) {
   return 1;

@@ -5,9 +5,26 @@
 #include "Function2D.hpp"
 #include <iostream>
 #include <cmath>
+#include <fstream>
+
+void plot() {
+  InitialU *u0 = new InitialU(); // u_0 (initial condition)
+  ExactU *uExact = new ExactU(); // exact u function
+  Parabolic *PDE = new Parabolic(pow(M_PI,-2), 1,0,1,*u0, *uExact, 4, 2);
+  (*PDE).constructMatrix();
+  (*PDE).Approximate();
+
+  (*PDE).ShowNorm();
+
+  delete u0;
+  delete uExact;
+  delete PDE;
+
+}
 
 int main(int argc, char* argv[]) {
 
+  /*
   InitialU *u0 = new InitialU(); // u_0 (initial condition)
   ExactU *uExact = new ExactU(); // exact u function
   Parabolic *PDE = new Parabolic(pow(M_PI,-2), 1,0,1,*u0, *uExact, 100, 10000);
@@ -18,11 +35,12 @@ int main(int argc, char* argv[]) {
   //(*PDE).ShowExact();
   (*PDE).Norm();
 
-
   // Deallocate storage
   delete u0;
   delete uExact;
   delete PDE;
+  */
 
+  plot();
   return 0;
 }

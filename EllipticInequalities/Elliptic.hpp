@@ -29,6 +29,8 @@ class Elliptic {
     void ShowExact(); // Show exact solution
     void Norm(); // Grid norm
 
+    void FindUExact();
+
   protected:
     double alpha; // alpha
     double beta; // beta
@@ -47,6 +49,8 @@ class Elliptic {
     AbstractFunction* mFunction; // Function pointer to f
 
     double w; // weight for SOR method
+
+    double *uExact;
 
 };
 

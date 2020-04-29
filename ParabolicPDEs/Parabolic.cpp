@@ -155,7 +155,7 @@ void Parabolic::ShowError() {
 }
 
 // Shows the grid norm
-void Parabolic::Norm() {
+void Parabolic::ShowNorm() {
   double sum = 0;
   for(int i=0; i<n-1; i++) {
     sum = sum +  fabs(uApprox[i]-(*mExactU).evaluate(xNodes[i], T));

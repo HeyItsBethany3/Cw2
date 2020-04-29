@@ -20,6 +20,7 @@ Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction,
   mLower = new double[n-2]; // lower diagonal vector
   mFvec = new double[n-1]; // F vector
   uApprox = new double[n-1]; // U solution
+  uExact = new double[n-1];
 
   Elliptic::Nodes(); // Constructs nodes automatically
 
@@ -121,6 +122,56 @@ void Elliptic::SolveSystem(const int iter) {
   delete uApproxOld;
 }
 
+// Solves AU=F
+void Elliptic::FindUExact() {
+
+  double* uArray;
+  uArray = new double[n-1];
+
+  //Create delta and Gvec vectors of the Triangular system
+  double *delta, *Gvec;
+  delta = new double[n-1];
+  Gvec = new double[n-1];
+  for(int i=0; i<=n-2; i++)
+  {
+  delta[i] = mDiag[i];
+  Gvec[i] = mFvec[i];
+  }
+
+  // Elimination stage
+  for(int i=1; i<=n-2; i++)
+  {
+    delta[i] = delta[i] - mUpper[i-1]*(mLower[i-1]/delta[i-1]);
+    Gvec[i] = Gvec[i] - Gvec[i-1]*(mLower[i-1]/delta[i-1]);
+  }
+
+  //Backsolve
+  uArray[n-2] = Gvec[n-2]/delta[n-2];
+  for(int i=n-3; i>=0; i--)
+  {
+    uArray[i] = ( Gvec[i] - mUpper[i]*uApprox[i+1] )/delta[i];
+  }
+
+  for(int i=0; i<n-1; i++){
+    // Free boundaries
+    double x1 = sqrt(3)/double(5);
+    double x2 = 1-(sqrt(3)/double(5));
+    if (mNodes[i] < x1) {
+      uExact[i] = uArray[i];
+    } else if (mNodes[i] > x2) {
+      uExact[i] = uArray[i];
+    } else {
+      uExact[i] = (*mFunction).psi(mNodes[i]);
+    }
+
+  }
+
+  // Deallocates storage
+  delete delta;
+  delete Gvec;
+  delete uArray;
+}
+
 void Elliptic::ShowApprox() {
   std::cout << "\nApproximation: ";
   for (int i=0; i<n-1; i++) {
@@ -132,7 +183,7 @@ void Elliptic::ShowApprox() {
 void Elliptic::ShowExact() {
   std::cout << "\nExact solution: ";
   for (int i=0; i<n-1; i++) {
-    std::cout << (*mFunction).exactU(mNodes[i]) << " ";
+    std::cout << uExact[i] << " ";
   }
   std::cout << std::endl;
 }
@@ -141,7 +192,7 @@ void Elliptic::ShowExact() {
 void Elliptic::Norm() {
   double sum = 0;
   for(int i=0; i<n-1; i++) {
-    sum = sum +  fabs(uApprox[i]-(*mFunction).exactU(mNodes[i]));
+    sum = sum +  fabs(uApprox[i]-uExact[i]);
   }
   sum = sqrt(sum *h);
   std::cout << "\nGrid norm: " << sum << "\n";

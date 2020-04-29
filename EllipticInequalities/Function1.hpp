@@ -18,7 +18,6 @@ class Function1: public AbstractFunction {
     // Initial guess for u at all interior points
     double init(double x);
 
-    // exact value for u(x)
-    double exactU(double x);
+
 
 };
