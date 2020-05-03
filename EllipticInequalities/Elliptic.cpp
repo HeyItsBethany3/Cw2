@@ -84,12 +84,13 @@ void Elliptic::ShowSystem() {
 }
 
 // Solves system of equations
-void Elliptic::SolveSystem(const int iter) {
+void Elliptic::SolveWithIter(const int iter) {
 
   double *uApproxOld;
   uApproxOld = new double[m];
   for(int i=0; i<m; i++) {
     uApproxOld[i] = (*mFunction).init(mNodes[i]);
+    uApprox[i] = (*mFunction).init(mNodes[i]);
   }
 
   double uVal, psi, psiVal;
@@ -105,8 +106,11 @@ void Elliptic::SolveSystem(const int iter) {
         uVal = (mFvec[i]-(mLower[i-1]*uApprox[i-1])-(mUpper[i]*uApproxOld[i+1]))/mDiag[i];
       }
       psi = (*mFunction).psi(mNodes[i]);
-      psiVal = (w*uVal)+((1-w)*uApproxOld[i]);
-      if (psi<psiVal) {
+
+      psiVal = (w*uVal)+((1.0-w)*uApproxOld[i]);
+
+
+      if ( psi <psiVal) {
         uApprox[i] = psi;
       } else {
         uApprox[i] = psiVal;
@@ -121,12 +125,69 @@ void Elliptic::SolveSystem(const int iter) {
 
   delete uApproxOld;
 }
+void Elliptic::SolveWithTol(const double tol) {
+
+  double *uApproxOld;
+  uApproxOld = new double[m];
+  for(int i=0; i<m; i++) {
+    uApproxOld[i] = (*mFunction).init(mNodes[i]);
+    uApprox[i] = (*mFunction).init(mNodes[i]);
+  }
+
+  double uVal, psi, psiVal;
+  double error = 10;
+  int k=0;
+
+  while((error >= tol)||(k>=10e6)) {
+    for(int i=0; i<m; i++) {
+
+      if (i==0) {
+        uVal = (mFvec[0]-(mUpper[0]*uApproxOld[1]))/mDiag[0];
+      } else if (i==m-1) {
+        uVal = (mFvec[m-1]-(mLower[m-2]*uApprox[m-2]))/mDiag[m-1];
+      } else {
+        uVal = (mFvec[i]-(mLower[i-1]*uApprox[i-1])-(mUpper[i]*uApproxOld[i+1]))/mDiag[i];
+      }
+      psi = (*mFunction).psi(mNodes[i]);
+
+      psiVal = (w*uVal)+((1.0-w)*uApproxOld[i]);
+
+
+      if ( psi <psiVal) {
+        uApprox[i] = psi;
+      } else {
+        uApprox[i] = psiVal;
+      }
+    }
+
+    for (int i=0; i<m; i++) {
+      uApproxOld[i] = uApprox[i];
+    }
+
+    double sum = 0;
+    for(int i=0; i<n-1; i++) {
+      sum = sum + fabs(uApprox[i]-uExact[i]);
+    }
+    error = sqrt(sum *h);
+    k = k+1;
+
+  }
+  if (error < tol) {
+    std::cout << "\nProcess finished after " << k << " iterations\n";
+  } else {
+    std::cout << "\nApproximation did not converge ";
+  }
+
+  delete uApproxOld;
+
+}
 
 // Solves AU=F
 void Elliptic::FindUExact() {
 
   double* uArray;
   uArray = new double[n-1];
+
 
   //Create delta and Gvec vectors of the Triangular system
   double *delta, *Gvec;
@@ -149,13 +210,19 @@ void Elliptic::FindUExact() {
   uArray[n-2] = Gvec[n-2]/delta[n-2];
   for(int i=n-3; i>=0; i--)
   {
-    uArray[i] = ( Gvec[i] - mUpper[i]*uApprox[i+1] )/delta[i];
+    uArray[i] = ( Gvec[i] - mUpper[i]*uArray[i+1] )/delta[i];
   }
 
   for(int i=0; i<n-1; i++){
     // Free boundaries
-    double x1 = sqrt(3)/double(5);
-    double x2 = 1-(sqrt(3)/double(5));
+    //double x1 = sqrt(3)/double(5);
+    //double x2 = 1.0-(sqrt(3)/double(5));
+
+    // *********** CHANGE THIS ************************************
+    //double x1 = double(5)/double(32);
+    //double x2 = double(27)/double(32);
+    double x1 = 0.16;
+    double x2 = 1-x1;
     if (mNodes[i] < x1) {
       uExact[i] = uArray[i];
     } else if (mNodes[i] > x2) {
@@ -166,13 +233,21 @@ void Elliptic::FindUExact() {
 
   }
 
+  /*
+  for(int i=0; i<n-1; i++) {
+    std::cout << "\n"<<uArray[i];
+  }
+  */
+
   // Deallocates storage
   delete delta;
   delete Gvec;
   delete uArray;
 }
 
+
 void Elliptic::ShowApprox() {
+  std::cout.precision(6);
   std::cout << "\nApproximation: ";
   for (int i=0; i<n-1; i++) {
     std::cout << uApprox[i] << " ";
@@ -181,6 +256,7 @@ void Elliptic::ShowApprox() {
 }
 
 void Elliptic::ShowExact() {
+  std::cout.precision(6);
   std::cout << "\nExact solution: ";
   for (int i=0; i<n-1; i++) {
     std::cout << uExact[i] << " ";
@@ -189,15 +265,17 @@ void Elliptic::ShowExact() {
 }
 
 // Shows the grid norm
-void Elliptic::Norm() {
+void Elliptic::ShowNorm() {
+  std::cout.precision(6);
   double sum = 0;
   for(int i=0; i<n-1; i++) {
     sum = sum +  fabs(uApprox[i]-uExact[i]);
   }
   sum = sqrt(sum *h);
   std::cout << "\nGrid norm: " << sum << "\n";
-
 }
+
+
 
 Elliptic::~Elliptic() {
   delete mNodes;

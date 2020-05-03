@@ -1,5 +1,6 @@
 #include "Elliptic.hpp"
 #include "Function1.hpp"
+#include "Function2.hpp"
 #include "AbstractFunction.hpp"
 #include <iostream>
 #include <fstream>
@@ -51,7 +52,7 @@ int main(int argc, char* argv[]) {
 
   /*
   Function1 *f1 = new Function1();
-  Elliptic *PDE = new Elliptic(0,1,*f1,4);
+  Elliptic *PDE = new Elliptic(0,1,*f1,16);
   (*PDE).FindSystem();
   //(*PDE).ShowSystem();
   (*PDE).SolveSystem();
@@ -60,14 +61,25 @@ int main(int argc, char* argv[]) {
   (*PDE).ShowNorm();
   delete f1;
   delete PDE;
-
   */
 
+  Function2 *f2 = new Function2();
+  Elliptic *PDE2 = new Elliptic(0,0,*f2,16);
+  (*PDE2).FindSystem();
+  //(*PDE2).ShowSystem();
+  (*PDE2).SolveSystem();
+  (*PDE2).ShowApprox();
+  delete f2;
+  delete PDE2;
+
+
+
+
   // Plot an approximation
-  plot(7);
+  //plot(7);
 
   // Plot errors
-  plotError(2,20);
+  //plotError(2,20);
 
 
 

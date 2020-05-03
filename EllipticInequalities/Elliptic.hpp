@@ -23,11 +23,13 @@ class Elliptic {
     void ShowSystem();
 
     // Solves system
-    void SolveSystem(const int iter); // number of iterations
+    void SolveWithIter(const int iter); // solves with number of iterations
+    void SolveWithTol(const double tol); // Solves with specific tolerance - need to have already found UExact
 
     void ShowApprox(); // Show approximation to problem
     void ShowExact(); // Show exact solution
-    void Norm(); // Grid norm
+    void ShowNorm(); // Grid norm
+
 
     void FindUExact();
 

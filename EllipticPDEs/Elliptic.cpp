@@ -24,8 +24,10 @@ Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction, 
 }
 
 void Elliptic::Nodes() {
+  //std::cout << "\nNodes: ";
   for(int i=1; i<n; i++) {
     mNodes[i-1] = i*h;
+    //std::cout << mNodes[i-1] << " ";
   }
 }
 
@@ -53,6 +55,7 @@ void Elliptic::FindSystem() {
   for(int i=1; i<m-1; i++) {
     mFvec[i] = -(factor*(*mFunction).evaluateF(mNodes[i]));
   }
+
 
 
 }
