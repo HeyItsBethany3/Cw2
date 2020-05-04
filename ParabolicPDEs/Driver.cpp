@@ -7,20 +7,44 @@
 #include <cmath>
 #include <fstream>
 
-void plot() {
-  InitialU *u0 = new InitialU(); // u_0 (initial condition)
+// Use even n and l values
+void plot(const double T, const int n, const int l) {
+  system("rm ParabolicPlot.csv");
+
+  InitialU *uInit = new InitialU(); // u_0 (initial condition)
   ExactU *uExact = new ExactU(); // exact u function
-  Parabolic *PDE = new Parabolic(pow(M_PI,-2), 1,0,1,*u0, *uExact, 4, 2);
+
+  // Approximate U at 0 (Initial condition)
+
+
+
+  // Approximates u at T
+  Parabolic *PDE = new Parabolic(pow(M_PI,-2), T,0,1,*uInit, *uExact, n, l);
   (*PDE).constructMatrix();
   (*PDE).Approximate();
 
-  (*PDE).ShowNorm();
 
-  delete u0;
+  // Approximates u at T/2
+  Parabolic *PDE2 = new Parabolic(pow(M_PI,-2), T/double(2),0,1,*uInit, *uExact,
+  n, l/double(2));
+  (*PDE2).constructMatrix();
+  (*PDE2).Approximate();
+
+  (*PDE).SaveInitial();
+  (*PDE2).SaveApprox();
+  (*PDE).SaveApprox();
+
+  system("cp ParabolicPlot.csv ../../../MATLAB/");
+
+  delete uInit;
   delete uExact;
   delete PDE;
+  delete PDE2;
+
 
 }
+
+void plot(const double T, const int n, const int l);
 
 int main(int argc, char* argv[]) {
 
@@ -41,6 +65,6 @@ int main(int argc, char* argv[]) {
   delete PDE;
   */
 
-  plot();
+  plot(1, 10, 10);
   return 0;
 }

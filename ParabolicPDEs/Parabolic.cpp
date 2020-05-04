@@ -1,6 +1,7 @@
 #include "Parabolic.hpp"
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 // Constructor
 Parabolic::Parabolic(const double A, const double time, const double g_0,
@@ -164,6 +165,47 @@ void Parabolic::ShowNorm() {
   std::cout << "\nGrid norm: " << sum << "\n";
 
 }
+
+void Parabolic::SaveInitial() {
+  std::ofstream file;
+  file.open("ParabolicPlot.csv", std::ios::app);
+  assert(file.is_open());
+
+  // x values
+  for(int i=0; i<n-1; i++) {
+    file << xNodes[i] << ",";
+  }
+  file << std::endl;
+
+  // u at tiime 0
+  for(int i=0; i<n-1; i++) {
+    file << (*mInitialU).evaluate(xNodes[i]) << ",";
+  }
+  file << std::endl;
+
+  file.close();
+}
+
+void Parabolic::SaveApprox() {
+  std::ofstream file;
+  file.open("ParabolicPlot.csv", std::ios::app);
+  assert(file.is_open());
+
+  // Approximation
+  for(int i=0; i<n-1; i++) {
+    file << uApprox[i] << ",";
+  }
+  file << std::endl;
+
+  // Exact solution
+  for(int i=0; i<n-1; i++) {
+    file << (*mExactU).evaluate(xNodes[i], T) << ",";
+  }
+  file << std::endl;
+  file.close();
+
+}
+
 
 // Destructor
 Parabolic::~Parabolic() {
