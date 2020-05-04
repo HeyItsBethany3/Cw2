@@ -1,6 +1,7 @@
 #include "Option.hpp"
 #include <cmath>
 #include <iostream>
+#include <fstream>
 
 // Constructor
 Option::Option(const double strike, const double interest, const double sigma,
@@ -192,4 +193,53 @@ void Option::ShowNorm() {
   sum = sqrt(sum *h);
   std::cout << "\nGrid norm: " << sum << "\n";
 
+}
+
+double Option::GetMaxError() {
+  double error = 0;
+  for(int i=0; i<n-1; i++) {
+    double ei = fabs(uApprox[i]-(*mFunction).exactU(xNodes[i],T));
+    if (ei > error) {
+      error = ei;
+    }
+  }
+  return error;
+}
+
+void Option::SaveInitial() {
+  std::ofstream file;
+  file.open("BSPlot.csv", std::ios::app);
+  assert(file.is_open());
+
+  // x values
+  for(int i=0; i<n-1; i++) {
+    file << xNodes[i] << ",";
+  }
+  file << std::endl;
+
+  // u at tiime 0
+  for(int i=0; i<n-1; i++) {
+    file << (*mFunction).payoff(xNodes[i]) << ",";
+  }
+  file << std::endl;
+  file.close();
+}
+
+void Option::SaveApprox() {
+  std::ofstream file;
+  file.open("BSPlot.csv", std::ios::app);
+  assert(file.is_open());
+
+  // Approximation
+  for(int i=0; i<n-1; i++) {
+    file << uApprox[i] << ",";
+  }
+  file << std::endl;
+
+  // Exact solution
+  for(int i=0; i<n-1; i++) {
+    file << (*mFunction).exactU(xNodes[i],T) << ",";
+  }
+  file << std::endl;
+  file.close();
 }

@@ -29,6 +29,11 @@ class Option {
     void ShowError(); // Show errors
     void ShowNorm(); // Shows grid function norm
 
+    double GetMaxError();
+
+    // Save to files
+    void SaveInitial();
+    void SaveApprox();
 
 
   protected:

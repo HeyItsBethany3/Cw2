@@ -15,7 +15,6 @@ void plot(const double T, const int n, const int l) {
   ExactU *uExact = new ExactU(); // exact u function
 
 
-
   // Approximates u at T
   Parabolic *PDE = new Parabolic(pow(M_PI,-2), T,0,1,*uInit, *uExact, n, l);
   (*PDE).constructMatrix();
