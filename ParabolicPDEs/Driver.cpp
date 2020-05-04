@@ -14,8 +14,6 @@ void plot(const double T, const int n, const int l) {
   InitialU *uInit = new InitialU(); // u_0 (initial condition)
   ExactU *uExact = new ExactU(); // exact u function
 
-  // Approximate U at 0 (Initial condition)
-
 
 
   // Approximates u at T
@@ -44,6 +42,40 @@ void plot(const double T, const int n, const int l) {
 
 }
 
+void plotError(int start, int iter, double c) {
+  int n = start;
+  system("rm ParabolicError.csv");
+  std::ofstream file;
+  file.open("ParabolicError.csv");
+  assert(file.is_open());
+  double T = 1;
+  double l = (pow(n,2)*T)/double(c);
+
+  for(int i=1; i<=iter; i++) {
+    InitialU *uInit = new InitialU(); // u_0 (initial condition)
+    ExactU *uExact = new ExactU(); // exact u function
+    Parabolic *PDE = new Parabolic(pow(M_PI,-2), T,0,1,*uInit, *uExact, n, l);
+    (*PDE).constructMatrix();
+    (*PDE).Approximate();
+
+
+    // saves h, deltaT and approximation
+    file << 1/double(n) << "," << (*PDE).GetMaxError() << "," << std::endl;
+
+    n = n*2;
+    l = (pow(n,2)*T)/double(c);
+
+    delete uInit;
+    delete uExact;
+    delete PDE;
+  }
+
+  file.close();
+  system("cp ParabolicError.csv ../../../MATLAB/");
+
+
+}
+
 void plot(const double T, const int n, const int l);
 
 int main(int argc, char* argv[]) {
@@ -65,6 +97,9 @@ int main(int argc, char* argv[]) {
   delete PDE;
   */
 
-  plot(1, 10, 10);
+  //plot(1, 10, 10);
+
+  //plotError(4,8, 0.5);
+  plotError(4,8, 1);
   return 0;
 }

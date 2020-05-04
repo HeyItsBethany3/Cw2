@@ -166,6 +166,17 @@ void Parabolic::ShowNorm() {
 
 }
 
+double Parabolic::GetMaxError() {
+  double error = 0;
+  for(int i=0; i<n-1; i++) {
+    double ei = fabs(uApprox[i]-(*mExactU).evaluate(xNodes[i], T));
+    if (ei > error) {
+      error = ei;
+    }
+  }
+  return error;
+}
+
 void Parabolic::SaveInitial() {
   std::ofstream file;
   file.open("ParabolicPlot.csv", std::ios::app);

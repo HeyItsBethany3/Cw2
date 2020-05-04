@@ -27,11 +27,11 @@ class Parabolic {
     void ShowError(); // Show errors
     void ShowNorm(); // Shows grid norm
 
+    double GetMaxError();
+
     // Saving to files
     void SaveInitial(); // saves solution at t=0
-    void SaveApprox(); // saves approx and exact solution at T 
-
-
+    void SaveApprox(); // saves approx and exact solution at T
 
 
 
