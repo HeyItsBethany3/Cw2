@@ -41,7 +41,6 @@ void plotError(int start, int iter) {
   file.close();
   system("cp EllipticError.csv ../../../MATLAB/");
 
-
 }
 
 

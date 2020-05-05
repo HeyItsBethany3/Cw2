@@ -30,8 +30,12 @@ class Elliptic {
     void ShowExact(); // Show exact solution
     void ShowNorm(); // Grid norm
 
+    double GetNorm();
+
+    void PlotApproximation();
 
     void FindUExact();
+
 
   protected:
     double alpha; // alpha

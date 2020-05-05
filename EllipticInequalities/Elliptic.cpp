@@ -2,6 +2,7 @@
 #include "AbstractFunction.hpp"
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 // n=m+1 mesh points, h=1/n
 Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction,
@@ -215,14 +216,15 @@ void Elliptic::FindUExact() {
 
   for(int i=0; i<n-1; i++){
     // Free boundaries
-    //double x1 = sqrt(3)/double(5);
-    //double x2 = 1.0-(sqrt(3)/double(5));
+    double x1 = sqrt(3)/double(5);
+    double x2 = 1.0-(sqrt(3)/double(5));
 
     // *********** CHANGE THIS ************************************
     //double x1 = double(5)/double(32);
     //double x2 = double(27)/double(32);
-    double x1 = 0.16;
-    double x2 = 1-x1;
+    //double x1 = 0.16;
+    //double x2 = 1-x1;
+
     if (mNodes[i] < x1) {
       uExact[i] = uArray[i];
     } else if (mNodes[i] > x2) {
@@ -275,6 +277,42 @@ void Elliptic::ShowNorm() {
   std::cout << "\nGrid norm: " << sum << "\n";
 }
 
+
+double Elliptic::GetNorm() {
+  std::cout.precision(6);
+  double sum = 0;
+  for(int i=0; i<n-1; i++) {
+    sum = sum +  fabs(uApprox[i]-uExact[i]);
+  }
+  sum = sqrt(sum *h);
+  return sum;
+
+}
+void Elliptic::PlotApproximation() {
+  system("rm EllipticIneqPlot.csv");
+  std::ofstream file;
+  file.open("EllipticIneqPlot.csv");
+  assert(file.is_open());
+
+  // x values
+  for(int i=0; i<n-1; i++) {
+    file << mNodes[i] << ",";
+  }
+  file << std::endl;
+
+  // Approximation
+  for(int i=0; i<n-1; i++) {
+    file << uApprox[i] << ",";
+  }
+  file << std::endl;
+
+  // Exact solution
+  for(int i=0; i<n-1; i++) {
+    file << uExact[i] << ",";
+  }
+  file.close();
+  system("cp EllipticIneqPlot.csv ../../../MATLAB/");
+}
 
 
 Elliptic::~Elliptic() {
