@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <string>
 
 // n=m+1 mesh points, h=1/n
 Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction,
@@ -22,6 +23,7 @@ Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction,
   mFvec = new double[n-1]; // F vector
   uApprox = new double[n-1]; // U solution
   uExact = new double[n-1];
+  uUnconstrained = new double[n-1];
 
   Elliptic::Nodes(); // Constructs nodes automatically
 
@@ -183,6 +185,60 @@ void Elliptic::SolveWithTol(const double tol) {
 
 }
 
+void Elliptic::UnconstrainedSol() {
+  double* uArray;
+  uArray = new double[n-1];
+
+  //Create delta and Gvec vectors of the Triangular system
+  double *delta, *Gvec;
+  delta = new double[n-1];
+  Gvec = new double[n-1];
+  for(int i=0; i<=n-2; i++)
+  {
+  delta[i] = mDiag[i];
+  Gvec[i] = mFvec[i];
+  }
+
+  // Elimination stage
+  for(int i=1; i<=n-2; i++)
+  {
+    delta[i] = delta[i] - mUpper[i-1]*(mLower[i-1]/delta[i-1]);
+    Gvec[i] = Gvec[i] - Gvec[i-1]*(mLower[i-1]/delta[i-1]);
+  }
+
+  //Backsolve
+  uArray[n-2] = Gvec[n-2]/delta[n-2];
+  for(int i=n-3; i>=0; i--)
+  {
+    uArray[i] = ( Gvec[i] - mUpper[i]*uArray[i+1] )/delta[i];
+  }
+
+  for(int i=0; i<n-1; i++){
+    // Free boundaries
+    double x1 = sqrt(3)/double(5);
+    double x2 = 1.0-(sqrt(3)/double(5));
+
+    // *********** CHANGE THIS ************************************
+    //double x1 = double(5)/double(32);
+    //double x2 = double(27)/double(32);
+    //double x1 = 0.16;
+    //double x2 = 1-x1;
+    uUnconstrained[i] = uArray[i];
+
+  }
+
+  /*
+  for(int i=0; i<n-1; i++) {
+    std::cout << "\n"<<uArray[i];
+  }
+  */
+
+  // Deallocates storage
+  delete delta;
+  delete Gvec;
+  delete uArray;
+}
+
 // Solves AU=F
 void Elliptic::FindUExact() {
 
@@ -219,12 +275,6 @@ void Elliptic::FindUExact() {
     double x1 = sqrt(3)/double(5);
     double x2 = 1.0-(sqrt(3)/double(5));
 
-    // *********** CHANGE THIS ************************************
-    //double x1 = double(5)/double(32);
-    //double x2 = double(27)/double(32);
-    //double x1 = 0.16;
-    //double x2 = 1-x1;
-
     if (mNodes[i] < x1) {
       uExact[i] = uArray[i];
     } else if (mNodes[i] > x2) {
@@ -232,6 +282,15 @@ void Elliptic::FindUExact() {
     } else {
       uExact[i] = (*mFunction).psi(mNodes[i]);
     }
+    /*
+    if ((mNodes[i] < x1) && (uArray[i]<1)) {
+      uExact[i] = uArray[i];
+    } else if ((mNodes[i] > x2) && (uArray[i]<1)) {
+      uExact[i] = uArray[i];
+    } else {
+      uExact[i] = (*mFunction).psi(mNodes[i]);
+    }
+    */
 
   }
 
@@ -288,7 +347,8 @@ double Elliptic::GetNorm() {
   return sum;
 
 }
-void Elliptic::PlotApproximation() {
+void Elliptic::PlotApproximation(std::string constraint) {
+
   system("rm EllipticIneqPlot.csv");
   std::ofstream file;
   file.open("EllipticIneqPlot.csv");
@@ -306,10 +366,16 @@ void Elliptic::PlotApproximation() {
   }
   file << std::endl;
 
-  // Exact solution
+  // Exact solution (or unconstrained solution)
   for(int i=0; i<n-1; i++) {
-    file << uExact[i] << ",";
+    if (constraint == "unconstrained") {
+      file << uUnconstrained[i] << ",";
+    } else {
+      file << uExact[i] << ",";
+    }
   }
+
+
   file.close();
   system("cp EllipticIneqPlot.csv ../../../MATLAB/");
 }

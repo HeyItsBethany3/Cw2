@@ -3,6 +3,7 @@
 #define ELLIPTIC
 
 #include "AbstractFunction.hpp"
+#include <string>
 
 class Elliptic {
 
@@ -30,9 +31,11 @@ class Elliptic {
     void ShowExact(); // Show exact solution
     void ShowNorm(); // Grid norm
 
+    void UnconstrainedSol(); // Finds unconstrained solution
+
     double GetNorm();
 
-    void PlotApproximation();
+    void PlotApproximation(std::string constraint);
 
     void FindUExact();
 
@@ -57,6 +60,7 @@ class Elliptic {
     double w; // weight for SOR method
 
     double *uExact;
+    double *uUnconstrained;
 
 };
 

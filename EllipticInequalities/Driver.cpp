@@ -3,17 +3,19 @@
 #include "AbstractFunction.hpp"
 #include <iostream>
 #include <fstream>
+#include <string>
 
 
-void plot(const int n) {
+void plot(const int n, std::string constraint) {
   Function1 *fun = new Function1();
   Elliptic *PDE = new Elliptic(0,0,*fun,n,1.8);
   (*PDE).FindSystem();
   (*PDE).FindUExact();
+  (*PDE).UnconstrainedSol();
   (*PDE).SolveWithIter(500); // CHANGE
-  (*PDE).PlotApproximation();
-  (*PDE).ShowApprox();
-  (*PDE).ShowExact();
+  (*PDE).PlotApproximation(constraint);
+  //(*PDE).ShowApprox();
+  //(*PDE).ShowExact();
 
   delete fun;
   delete PDE;
@@ -34,7 +36,7 @@ void plotError(int start, int iter) {
     (*PDE).FindSystem();
     (*PDE).FindUExact();
     (*PDE).SolveWithIter(100); // CHANGE
-    (*PDE).PlotApproximation();
+
 
 
     file << 1/double(n) << "," << (*PDE).GetNorm() << "," << std::endl;
@@ -70,7 +72,7 @@ int main(int argc, char* argv[]) {
   delete PDE;
   */
   // Plot an approximation
-  plot(30);
+  plot(100, "constrained");
 
   // Plot errors
   //plotError(2,20);
