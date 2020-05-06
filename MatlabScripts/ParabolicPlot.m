@@ -19,9 +19,9 @@ ax = gca; ax.FontSize = 14; axis tight;
 figure(2);
 plot(nodes,uT2,'m',nodes,uT2Exact, 'c', 'LineWidth',2);
 xlabel('x'); ylabel('u(x)'); legend('Approximation','Exact');
-title('Solutiion to parabolic PDE problem at t=T/2'); 
+title('Solution to parabolic PDE problem at t=T/2'); 
 
 figure(3);
 plot(nodes,uT,'m',nodes,uTExact, 'c', 'LineWidth',2);
 xlabel('x'); ylabel('u(x)'); legend('Approximation','Exact');
-title('Solutiion to parabolic PDE problem at t=T'); 
+title('Solution to parabolic PDE problem at t=T'); 

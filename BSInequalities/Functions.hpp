@@ -19,8 +19,7 @@ class Functions: public AbstractFunctions {
 
     // f_0 = u(t,0) (Boundary function at x=0)
     double f0(double t);
-
-    double fR(double R, double t);
+    double fR(double t);
 
 };
 

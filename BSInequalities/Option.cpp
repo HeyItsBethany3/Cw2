@@ -5,7 +5,7 @@
 
 // Constructor
 Option::Option(const double strike, const double interest, const double sigma,
-      const double maturity, const double maxX,
+      const double maturity, const double maxX, const double weight,
       AbstractFunctions& aFunction, const int N, const int L) {
 
         K = strike;
@@ -14,6 +14,7 @@ Option::Option(const double strike, const double interest, const double sigma,
         T = maturity;
         R = maxX;
         mFunction = &aFunction;
+        w = weight;
 
         n=N;
         m=N-1;
@@ -89,74 +90,69 @@ void Option::ShowMatrix() {
   std::cout << std::endl;
 }
 
-// Solve problem
-void Option::Approximate() {
-  double t = deltaT;
 
-  double* uApproxOld;
+// iter is iterations per time step
+void Option::SolveWithIter(const int iter) {
+
+  double *uApproxOld;
   uApproxOld = new double[m];
-  double* uApproxNew;
-  uApproxNew = new double[m];
-
-  for(int j=0; j<m; j++) {
-    uApproxOld[j] = (*mFunction).payoff(xNodes[j]);
+  for(int i=0; i<m; i++) {
+    uApproxOld[i] = (*mFunction).payoff(xNodes[i]);
+    uApprox[i] = (*mFunction).payoff(xNodes[i]);
   }
-  double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
-  uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
-  double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
-  factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
-  uApproxOld[m-1] += -(factor2 * (*mFunction).fR(R, t));
 
+  double uVal, payoff, psiVal;
+  double* fArray;
+  fArray = new double[m];
+  double t = deltaT;
   for(int i=1; i<=l; i++) {
 
-    // Solve tridiagonal system of equations A u_n+1 = u_n
-    double *delta;
-    delta = new double[n-1];
-
-    for(int i=0; i<=n-2; i++) {
-      delta[i] = mDiag[i];
+    // Update f Array
+    for(int i=0; i<m; i++) {
+      fArray[i] = uApproxOld[i];
     }
+    double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
+    fArray[0] += -(factor1 * (*mFunction).f0(t));
+    double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
+    factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
+    fArray[m-1] += -(factor2 * (*mFunction).fR(t));
 
-    // Elimination stage
-    for(int i=1; i<=n-2; i++)
-    {
-      delta[i] = delta[i] - mUpper[i-1]*(mLower[i-1]/delta[i-1]);
-      uApproxOld[i] = uApproxOld[i] - uApproxOld[i-1]*(mLower[i-1]/delta[i-1]);
+    for(int k=1; k<=iter; k++) {
+      for(int i=0; i<m; i++) {
+
+        if (i==0) {
+          uVal = (fArray[0]-(mUpper[0]*uApproxOld[1]))/mDiag[0];
+        } else if (i==m-1) {
+          uVal = (fArray[m-1]-(mLower[m-2]*uApprox[m-2]))/mDiag[m-1];
+        } else {
+          uVal = (fArray[i]-(mLower[i-1]*uApprox[i-1])-(mUpper[i]*uApproxOld[i+1]))/mDiag[i];
+        }
+        payoff = (*mFunction).payoff(xNodes[i]);
+        psiVal = (w*uVal)+((1.0-w)*uApproxOld[i]);
+
+        if ( payoff >= psiVal) {
+          uApprox[i] = payoff;
+        } else {
+          uApprox[i] = psiVal;
+        }
+      }
+      for (int i=0; i<m; i++) {
+        uApproxOld[i] = uApprox[i];
+      }
     }
-
-    // Backsolve
-    uApproxNew[n-2] = uApproxOld[n-2]/delta[n-2];
-    for(int i=n-3; i>=0; i--)
-    {
-      uApproxNew[i] = ( uApproxOld[i] - mUpper[i]*uApproxNew[i+1] )/delta[i];
-    }
-
-    // Deallocates storage
-    delete delta;
 
     // Update time
     t += deltaT;
 
-    // Update old vector for next iteration (and add boundary conditions)
-    for(int i=0; i<m; i++) {
-      uApproxOld[i] = uApproxNew[i];
+
+    for (int i=0; i<m; i++) {
+      fArray[i] = 0;
     }
-    double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
-    uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
-    double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
-    factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
-    uApproxOld[m-1] += -(factor2 * (*mFunction).fR(R, t));
-
-  }
-
-  // Save uApprox
-  for(int i=0; i<m; i++) {
-    uApprox[i] = uApproxNew[i];
   }
 
 
+  delete fArray;
   delete uApproxOld;
-  delete uApproxNew;
 }
 
 // Show approximation
@@ -208,7 +204,7 @@ double Option::GetMaxError() {
 
 void Option::SaveInitial() {
   std::ofstream file;
-  file.open("BSPlot.csv", std::ios::app);
+  file.open("BSIneqPlot.csv", std::ios::app);
   assert(file.is_open());
 
   // x values
@@ -227,7 +223,7 @@ void Option::SaveInitial() {
 
 void Option::SaveApprox() {
   std::ofstream file;
-  file.open("BSPlot.csv", std::ios::app);
+  file.open("BSIneqPlot.csv", std::ios::app);
   assert(file.is_open());
 
   // Approximation
@@ -236,7 +232,7 @@ void Option::SaveApprox() {
   }
   file << std::endl;
 
-  // Exact solution
+  // Exact solution for european options!
   for(int i=0; i<n-1; i++) {
     file << (*mFunction).exactU(xNodes[i],T) << ",";
   }

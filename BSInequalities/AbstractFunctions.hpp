@@ -16,7 +16,7 @@ class AbstractFunctions {
     // f_0 = u(t,0) (Boundary function at x=0)
     virtual double f0(double t) = 0;
 
-    virtual double fR(double R, double t) = 0;
+    virtual double fR(double t) = 0;
 
     // Destructor
     virtual ~AbstractFunctions() = 0;

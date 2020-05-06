@@ -29,11 +29,11 @@ double Functions::exactU(double x, double t) {
 }
 
 double Functions::f0(double t) {
-  return (K*exp(-r*t));
+  return K;
 }
 
-double Functions::fR(double R, double t) {
-  return Functions::exactU(R, t);
+double Functions::fR(double t) {
+  return 0;
 }
 
 // Destructor

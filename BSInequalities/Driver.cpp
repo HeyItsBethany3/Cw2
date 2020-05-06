@@ -7,20 +7,20 @@
 
 // Use even n and l values
 void plot(const double T, const int n, const int l) {
-  system("rm BSPlot.csv");
+  system("rm BSIneqPlot.csv");
 
-  Functions* f1 = new Functions(100, 0.1, 0.5);
+  Functions* f1 = new Functions(100, 0.05, 0.5);
 
   // Approximates u at T
-  Option* option1 = new Option(100, 0.1, 0.5, T, 300, *f1, n, l);
+  Option* option1 = new Option(100, 0.05, 0.5, T, 300, 1.8, *f1, n, l);
   (*option1).ConstructMatrix();
-  (*option1).Approximate();
+  (*option1).SolveWithIter(10);
 
 
   // Approximates u at T/2
-  Option* option2 = new Option(100, 0.1, 0.5, T/double(2), 300, *f1, n, l/double(2));
+  Option* option2 = new Option(100, 0.05, 0.5, T/double(2), 300, 1.8, *f1, n, l/double(2));
   (*option2).ConstructMatrix();
-  (*option2).Approximate();
+  (*option2).SolveWithIter(100);
 
 
   // Saves to file
@@ -28,7 +28,7 @@ void plot(const double T, const int n, const int l) {
   (*option2).SaveApprox();
   (*option1).SaveApprox();
 
-  system("cp BSPlot.csv ../../../MATLAB/");
+  system("cp BSIneqPlot.csv ../../../MATLAB/");
 
   delete f1;
   delete option1;
@@ -36,20 +36,20 @@ void plot(const double T, const int n, const int l) {
 
 }
 
-void plotError(int start, int iter, double c) {
+void plotError(int start, int iter,  double c) {
   int n = start;
-  system("rm BSError.csv");
+  system("rm BSIneqError.csv");
   std::ofstream file;
-  file.open("BSError.csv");
+  file.open("BSIneqError.csv");
   assert(file.is_open());
   double T = 5;
   double l = (pow(n,2)*T)/double(c);
 
   for(int i=1; i<=iter; i++) {
-    Functions* f1 = new Functions(100, 0.1, 0.5);
-    Option* option1 = new Option(100, 0.1, 0.5, T, 300, *f1, n, l);
+    Functions* f1 = new Functions(100, 0.05, 0.5);
+    Option* option1 = new Option(100, 0.05, 0.5, T, 300, 1.8, *f1, n, l);
     (*option1).ConstructMatrix();
-    (*option1).Approximate();
+    (*option1).SolveWithIter(10);
 
 
     // saves h, deltaT and approximation
@@ -63,33 +63,34 @@ void plotError(int start, int iter, double c) {
   }
 
   file.close();
-  system("cp BSError.csv ../../../MATLAB/");
+  system("cp BSIneqError.csv ../../../MATLAB/");
 
 
 }
 
 void plot(const double T, const int n, const int l);
+void plotError(int start, int iter, double c);
 
 
 int main(int argc, char* argv[]) {
   /*
-  Functions* f1 = new Functions(100, 0.1, 0.5);
-  Option* option = new Option(100, 0.1, 0.5, 5, 300, *f1, 10000, 100);
+  Functions* f1 = new Functions(100, 0.05, 0.5);
+  Option* option = new Option(100, 0.05, 0.5, 5, 300, 1.8, *f1, 100, 100);
 
   (*option).ConstructMatrix();
   //(*option).ShowMatrix();
-  (*option).Approximate();
+  (*option).SolveWithIter(10);
 
   //(*option).ShowApprox();
   //(*option).ShowExact();
-  (*option).ShowError();
-  (*option).ShowNorm();
+  //(*option).ShowError();
+  //(*option).ShowNorm();
   delete f1;
   delete option;
   */
 
-  plot(5,10,10);
-  plotError(4,8,1);
+  plot(5,100,100);
+  //plotError(2, 5,1);
 
 
 
