@@ -20,7 +20,7 @@ class Option {
     // Show matrix
     void ShowMatrix();
 
-
+    void FindEuropean(); // Find European approximation
     void SolveWithIter(const int iter);
 
 
@@ -62,6 +62,7 @@ class Option {
     double *mLower; // Lower diagonal
 
     double* uApprox; // Final approximation for u
+    double* European;
 
 
 

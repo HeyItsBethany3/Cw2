@@ -15,12 +15,14 @@ void plot(const double T, const int n, const int l) {
   Option* option1 = new Option(100, 0.05, 0.5, T, 300, 1.8, *f1, n, l);
   (*option1).ConstructMatrix();
   (*option1).SolveWithIter(10);
+  (*option1).FindEuropean();
 
 
   // Approximates u at T/2
   Option* option2 = new Option(100, 0.05, 0.5, T/double(2), 300, 1.8, *f1, n, l/double(2));
   (*option2).ConstructMatrix();
   (*option2).SolveWithIter(100);
+  (*option2).FindEuropean();
 
 
   // Saves to file
@@ -50,6 +52,7 @@ void plotError(int start, int iter,  double c) {
     Option* option1 = new Option(100, 0.05, 0.5, T, 300, 1.8, *f1, n, l);
     (*option1).ConstructMatrix();
     (*option1).SolveWithIter(10);
+    (*option1).FindEuropean();
 
 
     // saves h, deltaT and approximation
@@ -89,8 +92,8 @@ int main(int argc, char* argv[]) {
   delete option;
   */
 
-  plot(5,100,100);
-  //plotError(2, 5,1);
+  //plot(5,100,100);
+  plotError(2, 8,0.5);
 
 
 

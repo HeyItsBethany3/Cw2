@@ -31,6 +31,7 @@ Option::Option(const double strike, const double interest, const double sigma,
         mUpper = new double[m-1];
         mLower = new double[m-1];
         uApprox = new double[m];
+        European = new double[m];
 
 }
 
@@ -41,6 +42,7 @@ Option::~Option() {
   delete mUpper;
   delete mLower;
   delete uApprox;
+  delete European;
 }
 
 // Construct matrix A
@@ -90,6 +92,75 @@ void Option::ShowMatrix() {
   std::cout << std::endl;
 }
 
+// European approximation
+void Option::FindEuropean() {
+
+  double t = deltaT;
+  double* uApproxOld;
+  uApproxOld = new double[m];
+  double* uApproxNew;
+  uApproxNew = new double[m];
+
+  for(int j=0; j<m; j++) {
+    uApproxOld[j] = (*mFunction).payoff(xNodes[j]);
+  }
+  double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
+  uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
+  double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
+  factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
+  uApproxOld[m-1] += -(factor2 * (*mFunction).fR(R, t));
+
+  for(int i=1; i<=l; i++) {
+
+    // Solve tridiagonal system of equations A u_n+1 = u_n
+    double *delta;
+    delta = new double[n-1];
+
+    for(int i=0; i<=n-2; i++) {
+      delta[i] = mDiag[i];
+    }
+
+    // Elimination stage
+    for(int i=1; i<=n-2; i++)
+    {
+      delta[i] = delta[i] - mUpper[i-1]*(mLower[i-1]/delta[i-1]);
+      uApproxOld[i] = uApproxOld[i] - uApproxOld[i-1]*(mLower[i-1]/delta[i-1]);
+    }
+
+    // Backsolve
+    uApproxNew[n-2] = uApproxOld[n-2]/delta[n-2];
+    for(int i=n-3; i>=0; i--)
+    {
+      uApproxNew[i] = ( uApproxOld[i] - mUpper[i]*uApproxNew[i+1] )/delta[i];
+    }
+
+    // Deallocates storage
+    delete delta;
+
+    // Update time
+    t += deltaT;
+
+    // Update old vector for next iteration (and add boundary conditions)
+    for(int i=0; i<m; i++) {
+      uApproxOld[i] = uApproxNew[i];
+    }
+    double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
+    uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
+    double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
+    factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
+    uApproxOld[m-1] += -(factor2 * (*mFunction).fR(R, t));
+
+  }
+
+  // Save uApprox
+  for(int i=0; i<m; i++) {
+    European[i] = uApproxNew[i];
+  }
+
+  delete uApproxOld;
+  delete uApproxNew;
+}
+
 
 // iter is iterations per time step
 void Option::SolveWithIter(const int iter) {
@@ -115,7 +186,7 @@ void Option::SolveWithIter(const int iter) {
     fArray[0] += -(factor1 * (*mFunction).f0(t));
     double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
     factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
-    fArray[m-1] += -(factor2 * (*mFunction).fR(t));
+    fArray[m-1] += -(factor2 * (*mFunction).fR(R,t));
 
     for(int k=1; k<=iter; k++) {
       for(int i=0; i<m; i++) {
@@ -232,9 +303,9 @@ void Option::SaveApprox() {
   }
   file << std::endl;
 
-  // Exact solution for european options!
+  // European option price
   for(int i=0; i<n-1; i++) {
-    file << (*mFunction).exactU(xNodes[i],T) << ",";
+    file << European[i] << ",";
   }
   file << std::endl;
   file.close();

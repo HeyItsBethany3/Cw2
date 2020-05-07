@@ -32,7 +32,7 @@ double Functions::f0(double t) {
   return K;
 }
 
-double Functions::fR(double t) {
+double Functions::fR(double R, double t) {
   return 0;
 }
 
