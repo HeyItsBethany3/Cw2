@@ -214,24 +214,8 @@ void Elliptic::UnconstrainedSol() {
   }
 
   for(int i=0; i<n-1; i++){
-    // Free boundaries
-    double x1 = sqrt(3)/double(5);
-    double x2 = 1.0-(sqrt(3)/double(5));
-
-    // *********** CHANGE THIS ************************************
-    //double x1 = double(5)/double(32);
-    //double x2 = double(27)/double(32);
-    //double x1 = 0.16;
-    //double x2 = 1-x1;
     uUnconstrained[i] = uArray[i];
-
   }
-
-  /*
-  for(int i=0; i<n-1; i++) {
-    std::cout << "\n"<<uArray[i];
-  }
-  */
 
   // Deallocates storage
   delete delta;
@@ -239,71 +223,30 @@ void Elliptic::UnconstrainedSol() {
   delete uArray;
 }
 
-// Solves AU=F
 void Elliptic::FindUExact() {
 
-  double* uArray;
-  uArray = new double[n-1];
-
-
-  //Create delta and Gvec vectors of the Triangular system
-  double *delta, *Gvec;
-  delta = new double[n-1];
-  Gvec = new double[n-1];
-  for(int i=0; i<=n-2; i++)
-  {
-  delta[i] = mDiag[i];
-  Gvec[i] = mFvec[i];
-  }
-
-  // Elimination stage
-  for(int i=1; i<=n-2; i++)
-  {
-    delta[i] = delta[i] - mUpper[i-1]*(mLower[i-1]/delta[i-1]);
-    Gvec[i] = Gvec[i] - Gvec[i-1]*(mLower[i-1]/delta[i-1]);
-  }
-
-  //Backsolve
-  uArray[n-2] = Gvec[n-2]/delta[n-2];
-  for(int i=n-3; i>=0; i--)
-  {
-    uArray[i] = ( Gvec[i] - mUpper[i]*uArray[i+1] )/delta[i];
-  }
 
   for(int i=0; i<n-1; i++){
     // Free boundaries
     double x1 = sqrt(3)/double(5);
     double x2 = 1.0-(sqrt(3)/double(5));
+    double a = -double(25)/double(3);
+    double b1 = double(10)/double(sqrt(3));
+    double c1 = 0;
+    double b2 = (50.0-(10*sqrt(3)))/double(3);
+    double c2 = (-25.0+(10*sqrt(3)))/double(3);
 
     if (mNodes[i] < x1) {
-      uExact[i] = uArray[i];
+
+      uExact[i] = (a*pow(mNodes[i],2))+(b1*mNodes[i])+c1;
     } else if (mNodes[i] > x2) {
-      uExact[i] = uArray[i];
+      uExact[i] = (a*pow(mNodes[i],2))+(b2*mNodes[i])+c2;
     } else {
       uExact[i] = (*mFunction).psi(mNodes[i]);
     }
-    /*
-    if ((mNodes[i] < x1) && (uArray[i]<1)) {
-      uExact[i] = uArray[i];
-    } else if ((mNodes[i] > x2) && (uArray[i]<1)) {
-      uExact[i] = uArray[i];
-    } else {
-      uExact[i] = (*mFunction).psi(mNodes[i]);
-    }
-    */
 
   }
 
-  /*
-  for(int i=0; i<n-1; i++) {
-    std::cout << "\n"<<uArray[i];
-  }
-  */
-
-  // Deallocates storage
-  delete delta;
-  delete Gvec;
-  delete uArray;
 }
 
 

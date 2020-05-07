@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
   delete PDE;
   */
   // Plot an approximation
-  plot(100, "constrained");
+  plot(10, "constrained");
 
   // Plot errors
   //plotError(2,20);
