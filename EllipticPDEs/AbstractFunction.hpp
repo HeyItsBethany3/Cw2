@@ -1,7 +1,7 @@
 #ifndef ABSTRACTFUNCTION
 #define ABSTRACTFUNCTION
 
-/* Class which specifies a function f(x) and its derivative f'(x) */
+/* Class which specifies f(x) and the exact solution u(x) */
 
 class AbstractFunction {
   public:

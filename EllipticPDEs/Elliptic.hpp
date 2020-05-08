@@ -19,17 +19,19 @@ class Elliptic {
 
     // Constructs system
     void FindSystem();
+    // Displays system to solve
     void ShowSystem();
 
-    // Solves system
+    // Solves system (finds approximation)
     void SolveSystem();
 
-    void ShowApprox(); // Show approximation to problem
+    void ShowApprox(); // Show approximation
     void ShowExact(); // Show exact solution
-    void ShowNorm(); // Grid norm
+    void ShowNorm(); // Shows grid norm
 
-    double GetNorm();
+    double GetNorm(); // Retrieves grid norm
 
+    // Writes approximation and exact u to file
     void PlotApproximation();
 
   protected:
@@ -43,9 +45,9 @@ class Elliptic {
     double *mDiag; // Diagonal
     double *mUpper; // Upper diagonal
     double *mLower; // Lower diagonal
-    double *mFvec; // Fvec
+    double *mFvec;
 
-    double *uApprox; // U vector (solution)
+    double *uApprox; // Approximation for u
     AbstractFunction* mFunction; // Function pointer to f
 
 

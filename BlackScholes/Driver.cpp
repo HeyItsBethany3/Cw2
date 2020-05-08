@@ -6,19 +6,19 @@
 
 
 // Use even n and l values
-void plot(const double T, const int n, const int l) {
+void plot(const double T, const double r, const double sigma, const int n, const int l) {
   system("rm BSPlot.csv");
 
-  Functions* f1 = new Functions(100, 0.1, 0.5);
+  Functions* f1 = new Functions(100, r, sigma);
 
   // Approximates u at T
-  Option* option1 = new Option(100, 0.1, 0.5, T, 300, *f1, n, l);
+  Option* option1 = new Option(100, r, sigma, T, 300, *f1, n, l);
   (*option1).ConstructMatrix();
   (*option1).Approximate();
 
 
   // Approximates u at T/2
-  Option* option2 = new Option(100, 0.1, 0.5, T/double(2), 300, *f1, n, l/double(2));
+  Option* option2 = new Option(100, r, sigma, T/double(2), 300, *f1, n, l/double(2));
   (*option2).ConstructMatrix();
   (*option2).Approximate();
 
@@ -36,7 +36,7 @@ void plot(const double T, const int n, const int l) {
 
 }
 
-void plotError(int start, int iter, double c) {
+void plotError(const double r, const double sigma, const int start, const int iter, const double c) {
   int n = start;
   system("rm BSError.csv");
   std::ofstream file;
@@ -46,8 +46,8 @@ void plotError(int start, int iter, double c) {
   double l = (pow(n,2)*T)/double(c);
 
   for(int i=1; i<=iter; i++) {
-    Functions* f1 = new Functions(100, 0.1, 0.5);
-    Option* option1 = new Option(100, 0.1, 0.5, T, 300, *f1, n, l);
+    Functions* f1 = new Functions(100, r, sigma);
+    Option* option1 = new Option(100, r, sigma, T, 300, *f1, n, l);
     (*option1).ConstructMatrix();
     (*option1).Approximate();
 
@@ -68,7 +68,7 @@ void plotError(int start, int iter, double c) {
 
 }
 
-void plot(const double T, const int n, const int l);
+
 
 
 int main(int argc, char* argv[]) {
@@ -88,8 +88,8 @@ int main(int argc, char* argv[]) {
   delete option;
   */
 
-  plot(5,10,10);
-  plotError(4,8,1);
+  //plot(5,0.1,0.1,10,10);
+  plotError(0.1,0.1,4,8,1);
 
 
 

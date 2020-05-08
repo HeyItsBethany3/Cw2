@@ -10,6 +10,7 @@ double Function2::evaluateF(double x) {
   return double(50)/double(3);
 }
 
+// Specifies the exact u(x)
 double Function2::exactU(double x) {
   return 0; // No information available
 }

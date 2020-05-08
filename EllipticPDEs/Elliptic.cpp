@@ -4,25 +4,27 @@
 #include <cmath>
 #include <fstream>
 
-// n=m+1 mesh points, h=1/n
+// We solve for the interior points u_1,...,u_m where n=m+1 and h=1/n
 Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction, const int meshPoints) {
+
   alpha = a;
   beta = b;
   n = meshPoints;
   h = double(1)/double(n);
   mFunction = &aFunction;
 
-  mNodes = new double[n-1];
-  mDiag = new double[n-1]; // diagonal vector
-  mUpper = new double[n-2]; // upper diagonal vector
-  mLower = new double[n-2]; // lower diagonal vector
+  mNodes = new double[n-1]; // x values
+  mDiag = new double[n-1]; // diagonal vector for A
+  mUpper = new double[n-2]; // upper diagonal vector for A
+  mLower = new double[n-2]; // lower diagonal vector for A
   mFvec = new double[n-1]; // F vector
-  uApprox = new double[n-1]; // U solution
+  uApprox = new double[n-1]; // Stores u approximation
 
   Elliptic::Nodes(); // Constructs nodes automatically
 
 }
 
+// Constructs nodes
 void Elliptic::Nodes() {
   //std::cout << "\nNodes: ";
   for(int i=1; i<n; i++) {
@@ -31,6 +33,7 @@ void Elliptic::Nodes() {
   }
 }
 
+// Constructs A matrix and F vector
 void Elliptic::FindSystem() {
   // Find diagonal elements of A
   for (int i=0; i<n-1; i++) {
@@ -56,8 +59,6 @@ void Elliptic::FindSystem() {
     mFvec[i] = -(factor*(*mFunction).evaluateF(mNodes[i]));
   }
 
-
-
 }
 
 // Displays system to solve
@@ -66,17 +67,14 @@ void Elliptic::ShowSystem() {
   for (int i=0; i<=n-2; i++) {
     std::cout << mFvec[i] << " ";
   }
-
   std::cout << "\nd: ";
   for (int i=0; i<=n-2; i++) {
     std::cout << mDiag[i] << " ";
   }
-
   std::cout << "\nu: ";
   for (int i=0; i<n-2; i++) {
     std::cout << mUpper[i] << " ";
   }
-
   std::cout << "\nl: ";
   for (int i=0; i<n-2; i++) {
     std::cout << mLower[i] << " ";
@@ -87,12 +85,11 @@ void Elliptic::ShowSystem() {
 // Solves system of equations
 void Elliptic::SolveSystem() {
 
-  //Create delta and Gvec vectors of the Triangular system
+  // Creates dummy vectors
   double *delta, *Gvec;
   delta = new double[n-1];
   Gvec = new double[n-1];
-  for(int i=0; i<=n-2; i++)
-  {
+  for(int i=0; i<=n-2; i++) {
   delta[i] = mDiag[i];
   Gvec[i] = mFvec[i];
   }
@@ -104,10 +101,9 @@ void Elliptic::SolveSystem() {
     Gvec[i] = Gvec[i] - Gvec[i-1]*(mLower[i-1]/delta[i-1]);
   }
 
-  //Backsolve
+  // Backsolve
   uApprox[n-2] = Gvec[n-2]/delta[n-2];
-  for(int i=n-3; i>=0; i--)
-  {
+  for(int i=n-3; i>=0; i--) {
     uApprox[i] = ( Gvec[i] - mUpper[i]*uApprox[i+1] )/delta[i];
   }
 
@@ -116,6 +112,7 @@ void Elliptic::SolveSystem() {
   delete Gvec;
 }
 
+// Show approximation
 void Elliptic::ShowApprox() {
   std::cout << "\nApproximation: ";
   for (int i=0; i<n-1; i++) {
@@ -124,6 +121,7 @@ void Elliptic::ShowApprox() {
   std::cout << std::endl;
 }
 
+// Show exact solution
 void Elliptic::ShowExact() {
   std::cout << "\nExact solution: ";
   for (int i=0; i<n-1; i++) {
@@ -140,8 +138,9 @@ void Elliptic::ShowNorm() {
   }
   sum = sqrt(sum *h);
   std::cout << "\nGrid norm: " << sum << "\n";
-
 }
+
+// Retrieves the grid norm
 double Elliptic::GetNorm() {
   double sum = 0;
   for(int i=0; i<n-1; i++) {
@@ -152,31 +151,38 @@ double Elliptic::GetNorm() {
 }
 
 void Elliptic::PlotApproximation() {
+  // Writes data to a file
   std::ofstream file;
   file.open("EllipticPlot.csv");
   assert(file.is_open());
 
-  // x values
+  // Saves x values
+  file << 0 << ",";
   for(int i=0; i<n-1; i++) {
     file << mNodes[i] << ",";
   }
+  file << 1 << ",";
   file << std::endl;
 
-  // Approximation
+  // Saves Approximation
+  file << alpha << ",";
   for(int i=0; i<n-1; i++) {
     file << uApprox[i] << ",";
   }
+  file << beta << ",";
   file << std::endl;
 
-  // Exact solution
+  // Saves exact solution
+  file << (*mFunction).exactU(0) << ",";
   for(int i=0; i<n-1; i++) {
     file << (*mFunction).exactU(mNodes[i]) << ",";
   }
+  file << (*mFunction).exactU(1) << ",";
   file.close();
   system("cp EllipticPlot.csv ../../../MATLAB/");
 }
 
-
+// Deallocates storage
 Elliptic::~Elliptic() {
   delete mNodes;
   delete mDiag;

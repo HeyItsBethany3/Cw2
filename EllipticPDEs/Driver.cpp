@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 
+// Creates a plot of approximation and exact solution
 void plot(const int n) {
   Function1 *fun = new Function1();
   Elliptic *pde1 = new Elliptic(0,1,*fun,n);
@@ -17,6 +18,7 @@ void plot(const int n) {
 
 }
 
+// Creates an error convergence plot
 void plotError(int start, int iter) {
   int n = start;
   system("rm EllipticError.csv");
@@ -30,6 +32,7 @@ void plotError(int start, int iter) {
     (*pde1).FindSystem();
     (*pde1).SolveSystem();
 
+    // For each n, save the h (mesh size) and grid norm to file
     file << 1/double(n) << "," << (*pde1).GetNorm() << "," << std::endl;
 
     n = n*2;
@@ -43,47 +46,14 @@ void plotError(int start, int iter) {
 
 }
 
-
+// Function prototypes
 void plot(const int n);
 void plotError(int start, int iter);
 
 int main(int argc, char* argv[]) {
 
-  /*
-  Function1 *f1 = new Function1();
-  Elliptic *PDE = new Elliptic(0,1,*f1,16);
-  (*PDE).FindSystem();
-  //(*PDE).ShowSystem();
-  (*PDE).SolveSystem();
-  (*PDE).ShowApprox();
-  (*PDE).ShowExact();
-  (*PDE).ShowNorm();
-  delete f1;
-  delete PDE;
-  */
-
-  Function2 *f2 = new Function2();
-  Elliptic *PDE2 = new Elliptic(0,0,*f2,16);
-  (*PDE2).FindSystem();
-  //(*PDE2).ShowSystem();
-  (*PDE2).SolveSystem();
-  (*PDE2).ShowApprox();
-  delete f2;
-  delete PDE2;
-
-
-
-
-  // Plot an approximation
-  //plot(7);
-
-  // Plot errors
-  //plotError(2,20);
-
-
-
-
-
+  //plot(5);
+  plotError(2,15);
 
   return 0;
 }

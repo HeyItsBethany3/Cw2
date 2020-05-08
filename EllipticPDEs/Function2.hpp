@@ -12,7 +12,7 @@ class Function2: public AbstractFunction {
     // f(x)
     double evaluateF(double x);
 
-    // exact value for u(x)
+    // Exact value for u(x)
     double exactU(double x);
 
 };

@@ -228,8 +228,10 @@ void Option::SolveWithIter(const int iter) {
       }
     }
 
+
     // Update time
     t += deltaT;
+
 
     for (int i=0; i<m; i++) {
       fArray[i] = 0;
