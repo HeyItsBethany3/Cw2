@@ -5,26 +5,39 @@
 #include <fstream>
 #include <string>
 
-
-void plot(const int n, std::string constraint) {
+// Plots an approximation
+void plot(const int n, std::string constraint, std::string solveMethod,
+  const double parameter) {
+  /* n+1 is the number of spatial mesh points
+  solveMethod can be "iter" or "tol" - specifies whether to solve the system
+  using a specific number of iterations or until the error is less than a tolerance
+  constraint can be "constrained" or "unconstrained" - "constrained" plots the
+  approximation against its exact solution, "unconstrained" plots it against the
+  corresponding solution for Q1 (with no inequalities)
+  */
   Function1 *fun = new Function1();
   Elliptic *PDE = new Elliptic(0,0,*fun,n,1.8);
   (*PDE).FindSystem();
   (*PDE).FindUExact();
   (*PDE).UnconstrainedSol();
-  (*PDE).SolveWithIter(500); // CHANGE
+  if (solveMethod=="iter") {
+    // Solves using number of iterations
+    (*PDE).SolveWithIter(parameter);
+  } else {
+    // Solves until approximation converges
+    (*PDE).SolveWithTol(parameter);
+  }
   (*PDE).PlotApproximation(constraint);
-  //(*PDE).ShowApprox();
-  //(*PDE).ShowExact();
 
   delete fun;
   delete PDE;
 
 }
 
+// Creates error convergence plot
 void plotError(int start, int iter) {
 
-  int n = start;
+  int n = start; // initial n value
   system("rm EllipticIneqError.csv");
   std::ofstream file;
   file.open("EllipticIneqError.csv");
@@ -35,12 +48,12 @@ void plotError(int start, int iter) {
     Elliptic *PDE = new Elliptic(0,0,*fun,n,1.8);
     (*PDE).FindSystem();
     (*PDE).FindUExact();
-    (*PDE).SolveWithIter(100); // CHANGE
+    (*PDE).SolveWithTol(0.05);
 
-
-
+    // Saves mesh size and grid error norm to file
     file << 1/double(n) << "," << (*PDE).GetNorm() << "," << std::endl;
 
+    // Updates number of mesh points
     n = n*2;
 
     delete fun;
@@ -52,31 +65,16 @@ void plotError(int start, int iter) {
 
 }
 
+// Function prototypes
+void plot(const int n, std::string constraint, std::string solveMethod,
+  const double parameter);
+void plotError(int start, int iter);
 
 int main(int argc, char* argv[]) {
-  /*
-  Function1 *f1 = new Function1();
-  //Elliptic *PDE = new Elliptic(0,0,*f1,16, 1.8);
-  Elliptic *PDE = new Elliptic(0,0,*f1,16, 1.8);
 
-  (*PDE).FindSystem();
-  //(*PDE).ShowSystem();
-  (*PDE).FindUExact();
-  //(*PDE).SolveWithTol(0.5);
-  (*PDE).SolveWithIter(500);
-  (*PDE).ShowApprox();
-  (*PDE).ShowExact();
-  (*PDE).ShowNorm();
-
-  delete f1;
-  delete PDE;
-  */
-  // Plot an approximation
-  plot(10, "constrained");
-
-  // Plot errors
-  //plotError(2,20);
-
+  //plot(16, "constrained","iter", 8);
+  //plot(16, "unconstrained", "tol", 0.05);
+  plotError(8,6);
 
   return 0;
 }

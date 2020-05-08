@@ -10,7 +10,7 @@ double Function1::f(double x) {
   return double(50)/double(3);
 }
 
-
+// psi
 double Function1::psi(double x) {
   return 1;
 }

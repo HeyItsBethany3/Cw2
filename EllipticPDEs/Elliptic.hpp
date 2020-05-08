@@ -1,8 +1,9 @@
-
 #ifndef ELLIPTIC
 #define ELLIPTIC
 
 #include "AbstractFunction.hpp"
+
+/* Class to solve the elliptic PDE problem */
 
 class Elliptic {
 

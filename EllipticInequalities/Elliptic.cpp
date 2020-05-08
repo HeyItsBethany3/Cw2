@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 
-// n=m+1 mesh points, h=1/n
+// We solve for the interior points u_1,...,u_m where n=m+1 and h=1/n
 Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction,
   const int meshPoints, const double weight) {
   alpha = a;
@@ -17,13 +17,13 @@ Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction,
   mFunction = &aFunction;
 
   mNodes = new double[n-1];
-  mDiag = new double[n-1]; // diagonal vector
-  mUpper = new double[n-2]; // upper diagonal vector
-  mLower = new double[n-2]; // lower diagonal vector
+  mDiag = new double[n-1]; // diagonal vector for A
+  mUpper = new double[n-2]; // upper diagonal vector for A
+  mLower = new double[n-2]; // lower diagonal vector for A
   mFvec = new double[n-1]; // F vector
-  uApprox = new double[n-1]; // U solution
-  uExact = new double[n-1];
-  uUnconstrained = new double[n-1];
+  uApprox = new double[n-1]; // Stores u approximation
+  uExact = new double[n-1]; // Stores exact u(x)
+  uUnconstrained = new double[n-1]; // Stores unconstrained approximation
 
   Elliptic::Nodes(); // Constructs nodes automatically
 
@@ -35,6 +35,7 @@ void Elliptic::Nodes() {
   }
 }
 
+// Constructs A matrix and F vector
 void Elliptic::FindSystem() {
   // Find diagonal elements of A
   for (int i=0; i<n-1; i++) {
@@ -86,10 +87,10 @@ void Elliptic::ShowSystem() {
   std::cout << std::endl;
 }
 
-// Solves system of equations
+// Solves problem using "iter" iterations of the SOR method
 void Elliptic::SolveWithIter(const int iter) {
 
-  double *uApproxOld;
+  double *uApproxOld; // Stores previous iteration of method
   uApproxOld = new double[m];
   for(int i=0; i<m; i++) {
     uApproxOld[i] = (*mFunction).init(mNodes[i]);
@@ -99,6 +100,8 @@ void Elliptic::SolveWithIter(const int iter) {
   double uVal, psi, psiVal;
 
   for(int k=1; k<=iter; k++) {
+
+    // Implements SOR method
     for(int i=0; i<m; i++) {
 
       if (i==0) {
@@ -112,7 +115,7 @@ void Elliptic::SolveWithIter(const int iter) {
 
       psiVal = (w*uVal)+((1.0-w)*uApproxOld[i]);
 
-
+      // Updates u value
       if ( psi <psiVal) {
         uApprox[i] = psi;
       } else {
@@ -120,14 +123,15 @@ void Elliptic::SolveWithIter(const int iter) {
       }
     }
 
+    // Update previous iteration
     for (int i=0; i<m; i++) {
       uApproxOld[i] = uApprox[i];
     }
-
   }
-
   delete uApproxOld;
 }
+
+// Solves problem until approximation converges
 void Elliptic::SolveWithTol(const double tol) {
 
   double *uApproxOld;
@@ -141,7 +145,11 @@ void Elliptic::SolveWithTol(const double tol) {
   double error = 10;
   int k=0;
 
-  while((error >= tol)||(k>=10e6)) {
+  // SOR method stops when the grid norm error is less than a specific tolerance
+  // (or stops if iterations become too high)
+  while((error >= tol)||(k>=100000)) {
+
+    // Implements SOR method
     for(int i=0; i<m; i++) {
 
       if (i==0) {
@@ -155,7 +163,7 @@ void Elliptic::SolveWithTol(const double tol) {
 
       psiVal = (w*uVal)+((1.0-w)*uApproxOld[i]);
 
-
+      // Updates u values
       if ( psi <psiVal) {
         uApprox[i] = psi;
       } else {
@@ -163,10 +171,12 @@ void Elliptic::SolveWithTol(const double tol) {
       }
     }
 
+    // Update previous iteration
     for (int i=0; i<m; i++) {
       uApproxOld[i] = uApprox[i];
     }
 
+    // Re-calculates error norm
     double sum = 0;
     for(int i=0; i<n-1; i++) {
       sum = sum + fabs(uApprox[i]-uExact[i]);
@@ -176,43 +186,41 @@ void Elliptic::SolveWithTol(const double tol) {
 
   }
   if (error < tol) {
-    std::cout << "\nProcess finished after " << k << " iterations\n";
+    std::cout << "\nProcess finished after " << k << " iterations.\n";
   } else {
-    std::cout << "\nApproximation did not converge ";
+    std::cout << "\nApproximation did not converge.";
   }
 
   delete uApproxOld;
-
 }
 
+// Calculates unconstrained solution for the corresponding Q1 problem
 void Elliptic::UnconstrainedSol() {
   double* uArray;
   uArray = new double[n-1];
 
-  //Create delta and Gvec vectors of the Triangular system
+  // Creates dummy vectors
   double *delta, *Gvec;
   delta = new double[n-1];
   Gvec = new double[n-1];
-  for(int i=0; i<=n-2; i++)
-  {
+  for(int i=0; i<=n-2; i++) {
   delta[i] = mDiag[i];
   Gvec[i] = mFvec[i];
   }
 
   // Elimination stage
-  for(int i=1; i<=n-2; i++)
-  {
+  for(int i=1; i<=n-2; i++) {
     delta[i] = delta[i] - mUpper[i-1]*(mLower[i-1]/delta[i-1]);
     Gvec[i] = Gvec[i] - Gvec[i-1]*(mLower[i-1]/delta[i-1]);
   }
 
-  //Backsolve
+  // Backsolve
   uArray[n-2] = Gvec[n-2]/delta[n-2];
-  for(int i=n-3; i>=0; i--)
-  {
+  for(int i=n-3; i>=0; i--) {
     uArray[i] = ( Gvec[i] - mUpper[i]*uArray[i+1] )/delta[i];
   }
 
+  // Updates unconstrained solution
   for(int i=0; i<n-1; i++){
     uUnconstrained[i] = uArray[i];
   }
@@ -223,33 +231,33 @@ void Elliptic::UnconstrainedSol() {
   delete uArray;
 }
 
+// Finds exact solution to the elliptical inequality problem
 void Elliptic::FindUExact() {
-
 
   for(int i=0; i<n-1; i++){
     // Free boundaries
     double x1 = sqrt(3)/double(5);
     double x2 = 1.0-(sqrt(3)/double(5));
+
+    // Defines functions
     double a = -double(25)/double(3);
     double b1 = double(10)/double(sqrt(3));
     double c1 = 0;
     double b2 = (50.0-(10*sqrt(3)))/double(3);
     double c2 = (-25.0+(10*sqrt(3)))/double(3);
 
+    // u(x) is a piecewise function (depending on the free boundaries)
     if (mNodes[i] < x1) {
-
       uExact[i] = (a*pow(mNodes[i],2))+(b1*mNodes[i])+c1;
     } else if (mNodes[i] > x2) {
       uExact[i] = (a*pow(mNodes[i],2))+(b2*mNodes[i])+c2;
     } else {
       uExact[i] = (*mFunction).psi(mNodes[i]);
     }
-
   }
-
 }
 
-
+// Show approximation
 void Elliptic::ShowApprox() {
   std::cout.precision(6);
   std::cout << "\nApproximation: ";
@@ -259,6 +267,7 @@ void Elliptic::ShowApprox() {
   std::cout << std::endl;
 }
 
+// Show exact solution
 void Elliptic::ShowExact() {
   std::cout.precision(6);
   std::cout << "\nExact solution: ";
@@ -279,7 +288,7 @@ void Elliptic::ShowNorm() {
   std::cout << "\nGrid norm: " << sum << "\n";
 }
 
-
+// Retrieves grid norm
 double Elliptic::GetNorm() {
   std::cout.precision(6);
   double sum = 0;
@@ -291,39 +300,38 @@ double Elliptic::GetNorm() {
 
 }
 void Elliptic::PlotApproximation(std::string constraint) {
-
+  // Writes data to a file
   system("rm EllipticIneqPlot.csv");
   std::ofstream file;
   file.open("EllipticIneqPlot.csv");
   assert(file.is_open());
 
-  // x values
+  // Saves x values
   for(int i=0; i<n-1; i++) {
     file << mNodes[i] << ",";
   }
   file << std::endl;
 
-  // Approximation
+  // Saves approximation
   for(int i=0; i<n-1; i++) {
     file << uApprox[i] << ",";
   }
   file << std::endl;
 
-  // Exact solution (or unconstrained solution)
+  // Saves exact solution or unconstrained solution (depending on 'constraint')
   for(int i=0; i<n-1; i++) {
     if (constraint == "unconstrained") {
       file << uUnconstrained[i] << ",";
-    } else {
+    } else { // if constraint is "constrained"
       file << uExact[i] << ",";
     }
   }
-
 
   file.close();
   system("cp EllipticIneqPlot.csv ../../../MATLAB/");
 }
 
-
+// Deallocates storage
 Elliptic::~Elliptic() {
   delete mNodes;
   delete mDiag;
@@ -331,4 +339,6 @@ Elliptic::~Elliptic() {
   delete mLower;
   delete mFvec;
   delete uApprox;
+  delete uExact;
+  delete uUnconstrained;
 }

@@ -5,6 +5,8 @@
 #include "AbstractFunction.hpp"
 #include <string>
 
+/* Class to solve the elliptic inequality PDE problem */
+
 class Elliptic {
 
   public:
@@ -21,30 +23,32 @@ class Elliptic {
 
     // Constructs system
     void FindSystem();
+
+    // Show system to solve
     void ShowSystem();
 
     // Solves system
-    void SolveWithIter(const int iter); // solves with number of iterations
-    void SolveWithTol(const double tol); // Solves with specific tolerance - need to have already found UExact
+    void SolveWithIter(const int iter); // Solves with number of iterations
+    void SolveWithTol(const double tol); // Solves with specific tolerance
 
     void ShowApprox(); // Show approximation to problem
     void ShowExact(); // Show exact solution
-    void ShowNorm(); // Grid norm
+    void ShowNorm(); // Show grid norm
 
-    void UnconstrainedSol(); // Finds unconstrained solution
+    double GetNorm(); // Retrieves grid norm
 
-    double GetNorm();
+    void UnconstrainedSol(); // Finds unconstrained solution (for Q1)
+    void FindUExact(); // Finds exact solution
 
+    // Saves data to file to create plot
     void PlotApproximation(std::string constraint);
-
-    void FindUExact();
 
 
   protected:
     double alpha; // alpha
     double beta; // beta
-    int n; // number of mesh points
-    double h; // step-size
+    int n; // n+1 is the number of mesh points
+    double h; // spatial step-size
     int m; // n-1
 
     double *mNodes; // Interior points to solve for
@@ -54,13 +58,13 @@ class Elliptic {
     double *mLower; // Lower diagonal
     double *mFvec; // Fvec
 
-    double *uApprox; // U vector (solution)
+    double *uApprox; // Approximation for u
     AbstractFunction* mFunction; // Function pointer to f
 
     double w; // weight for SOR method
 
-    double *uExact;
-    double *uUnconstrained;
+    double *uExact; // Exact u(x)
+    double *uUnconstrained; // Unconstrained solution
 
 };
 

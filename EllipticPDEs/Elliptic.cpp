@@ -26,10 +26,8 @@ Elliptic::Elliptic(const double a, const double b, AbstractFunction& aFunction, 
 
 // Constructs nodes
 void Elliptic::Nodes() {
-  //std::cout << "\nNodes: ";
   for(int i=1; i<n; i++) {
     mNodes[i-1] = i*h;
-    //std::cout << mNodes[i-1] << " ";
   }
 }
 
@@ -95,8 +93,7 @@ void Elliptic::SolveSystem() {
   }
 
   // Elimination stage
-  for(int i=1; i<=n-2; i++)
-  {
+  for(int i=1; i<=n-2; i++) {
     delta[i] = delta[i] - mUpper[i-1]*(mLower[i-1]/delta[i-1]);
     Gvec[i] = Gvec[i] - Gvec[i-1]*(mLower[i-1]/delta[i-1]);
   }
