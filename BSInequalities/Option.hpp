@@ -65,6 +65,7 @@ class Option {
     double* uApprox; // Final approximation for u
     double* European;
     double* FreeBoundary;
+    double* FBNotFound;
 
 
 };

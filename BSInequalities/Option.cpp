@@ -25,6 +25,7 @@ Option::Option(const double strike, const double interest, const double sigma,
         h = R/double(N); // spatial step-size
         for(int i=0; i<m; i++) {
           xNodes[i]=(i+1)*h;
+          FBNotFound=0;
         }
 
         mDiag = new double[m];
@@ -32,7 +33,9 @@ Option::Option(const double strike, const double interest, const double sigma,
         mLower = new double[m-1];
         uApprox = new double[m];
         European = new double[m];
-        FreeBoundary = new double[l];
+        FreeBoundary = new double[m];
+        FBNotFound = new double[m];
+
 
 }
 
@@ -214,20 +217,17 @@ void Option::SolveWithIter(const int iter) {
       }
     }
 
-    // Find free boundary x value for this time step
-    bool FBNotFound = true;
-    int k=0;
-    double FB = R+1;  // Represents infinity stopping time
-    double payoff;
-    while((FBNotFound)&&(k<l)) {
-      payoff =  (*mFunction).payoff(xNodes[k]);
+    // Find free boundary t value for each x
+    for(int i=0; i<m; i++) {
+      double payoff = (*mFunction).payoff(xNodes[i]);
       if (fabs(uApprox[i]-payoff)<10e-10) {
-        FB = xNodes[k];
-        FBNotFound = false;
+        FreeBoundary[i] = t; // Exercise option at this time step
+        FBNotFound[i] = 1;
+        //std::cout << "\nuApprox[i] " << uApprox[i] << " payoff " << payoff;
+        //std::cout << " fb " << FreeBoundary[i];
       }
-      k++;
     }
-    FreeBoundary[i-1] = FB;
+
 
     // Update time
     t += deltaT;
@@ -237,6 +237,14 @@ void Option::SolveWithIter(const int iter) {
       fArray[i] = 0;
     }
   }
+
+  // If free boundary has not been set yet, set to out of range time to represent infinity
+  for(int i=0; i<m; i++) {
+    if(FBNotFound[i]==0) {
+      FreeBoundary[i]= -deltaT; // sets to T+1
+    }
+  }
+
 
 
   delete fArray;
@@ -335,13 +343,13 @@ void Option::SaveFB() {
   assert(file.is_open());
 
   // Approximation
-  for(int i=1; i<=l; i++) {
-    file << (i*deltaT) << ",";
+  for(int i=0; i<m; i++) {
+    file << xNodes[i] << ",";
   }
   file << std::endl;
 
   // European option price
-  for(int i=0; i<l; i++) {
+  for(int i=0; i<m; i++) {
     file << FreeBoundary[i] << ",";
   }
   file << std::endl;
