@@ -34,6 +34,7 @@ class Option {
     // Save to files
     void SaveInitial();
     void SaveApprox();
+    void SaveFB();
 
 
   protected:
@@ -63,7 +64,7 @@ class Option {
 
     double* uApprox; // Final approximation for u
     double* European;
-
+    double* FreeBoundary;
 
 
 };

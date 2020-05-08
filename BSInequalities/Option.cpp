@@ -32,6 +32,7 @@ Option::Option(const double strike, const double interest, const double sigma,
         mLower = new double[m-1];
         uApprox = new double[m];
         European = new double[m];
+        FreeBoundary = new double[l];
 
 }
 
@@ -43,6 +44,7 @@ Option::~Option() {
   delete mLower;
   delete uApprox;
   delete European;
+  delete FreeBoundary;
 }
 
 // Construct matrix A
@@ -212,6 +214,21 @@ void Option::SolveWithIter(const int iter) {
       }
     }
 
+    // Find free boundary x value for this time step
+    bool FBNotFound = true;
+    int k=0;
+    double FB = R+1;  // Represents infinity stopping time
+    double payoff;
+    while((FBNotFound)&&(k<l)) {
+      payoff =  (*mFunction).payoff(xNodes[k]);
+      if (fabs(uApprox[i]-payoff)<10e-10) {
+        FB = xNodes[k];
+        FBNotFound = false;
+      }
+      k++;
+    }
+    FreeBoundary[i-1] = FB;
+
     // Update time
     t += deltaT;
 
@@ -309,4 +326,25 @@ void Option::SaveApprox() {
   }
   file << std::endl;
   file.close();
+}
+
+void Option::SaveFB() {
+
+  std::ofstream file;
+  file.open("BSIneqFB.csv", std::ios::app);
+  assert(file.is_open());
+
+  // Approximation
+  for(int i=1; i<=l; i++) {
+    file << (i*deltaT) << ",";
+  }
+  file << std::endl;
+
+  // European option price
+  for(int i=0; i<l; i++) {
+    file << FreeBoundary[i] << ",";
+  }
+  file << std::endl;
+  file.close();
+
 }

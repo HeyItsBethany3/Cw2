@@ -38,6 +38,22 @@ void plot(const double T, const int n, const int l) {
 
 }
 
+void plotFB(const double T, const int n, const int l) {
+  system("rm BSIneqFB.csv");
+
+  Functions* f1 = new Functions(100, 0.05, 0.5);
+  Option* option1 = new Option(100, 0.05, 0.5, T, 300, 1.8, *f1, n, l);
+  (*option1).ConstructMatrix();
+  (*option1).SolveWithIter(100);
+  (*option1).SaveFB();
+
+  system("cp BSIneqFB.csv ../../../MATLAB/");
+  delete f1;
+  delete option1;
+
+
+}
+
 void plotError(int start, int iter,  double c) {
   int n = start;
   system("rm BSIneqError.csv");
@@ -73,7 +89,7 @@ void plotError(int start, int iter,  double c) {
 
 void plot(const double T, const int n, const int l);
 void plotError(int start, int iter, double c);
-
+void plotFB(const double T, const int n, const int l);
 
 int main(int argc, char* argv[]) {
   /*
@@ -93,7 +109,8 @@ int main(int argc, char* argv[]) {
   */
 
   //plot(5,100,100);
-  plotError(2, 8,0.5);
+  //plotError(2, 8,0.5);
+  plotFB(5,100,100);
 
 
 
