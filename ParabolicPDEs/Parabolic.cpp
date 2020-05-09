@@ -225,6 +225,7 @@ void Parabolic::SaveApprox() {
   file.close();
 }
 
+
 // Destructor
 Parabolic::~Parabolic() {
   delete xNodes;

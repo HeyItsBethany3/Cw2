@@ -302,15 +302,19 @@ void Option::SaveInitial() {
   assert(file.is_open());
 
   // x values
+  file << 0 << ",";
   for(int i=0; i<n-1; i++) {
     file << xNodes[i] << ",";
   }
+  file << R << ",";
   file << std::endl;
 
   // u at tiime 0
+  file << (*mFunction).payoff(0) << ",";
   for(int i=0; i<n-1; i++) {
     file << (*mFunction).payoff(xNodes[i]) << ",";
   }
+  file << (*mFunction).payoff(R) << ",";
   file << std::endl;
   file.close();
 }
@@ -321,15 +325,19 @@ void Option::SaveApprox() {
   assert(file.is_open());
 
   // Approximation
+  file << (*mFunction).f0(T) << ",";
   for(int i=0; i<n-1; i++) {
     file << uApprox[i] << ",";
   }
+  file << (*mFunction).fR(R, T) << ",";
   file << std::endl;
 
   // European option price
+  file << (*mFunction).f0(T) << ",";
   for(int i=0; i<n-1; i++) {
     file << European[i] << ",";
   }
+  file << (*mFunction).fR(R, T) << ",";
   file << std::endl;
   file.close();
 }
@@ -341,15 +349,19 @@ void Option::SaveFB() {
   assert(file.is_open());
 
   // Approximation
+  file << 0 << ",";
   for(int i=0; i<m; i++) {
     file << xNodes[i] << ",";
   }
+  file << R << ",";
   file << std::endl;
 
-  // European option price
+  // Free boundary
+  file << (*mFunction).f0(T) << ",";
   for(int i=0; i<m; i++) {
     file << FreeBoundary[i] << ",";
   }
+  file << (*mFunction).fR(R, T) << ",";
   file << std::endl;
   file.close();
 

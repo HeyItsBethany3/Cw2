@@ -210,15 +210,19 @@ void Option::SaveInitial() {
   assert(file.is_open());
 
   // x values
+  file << 0 << ",";
   for(int i=0; i<n-1; i++) {
     file << xNodes[i] << ",";
   }
+  file << R << ",";
   file << std::endl;
 
   // u at tiime 0
+  file << (*mFunction).payoff(0) << ",";
   for(int i=0; i<n-1; i++) {
     file << (*mFunction).payoff(xNodes[i]) << ",";
   }
+  file << (*mFunction).payoff(R) << ",";
   file << std::endl;
   file.close();
 }
@@ -230,15 +234,19 @@ void Option::SaveApprox() {
   assert(file.is_open());
 
   // Approximation
+  file << (*mFunction).f0(T) << ",";
   for(int i=0; i<n-1; i++) {
     file << uApprox[i] << ",";
   }
+  file << (*mFunction).fR(R, T) << ",";
   file << std::endl;
 
   // Exact solution
+  file << (*mFunction).f0(T) << ",";
   for(int i=0; i<n-1; i++) {
     file << (*mFunction).exactU(xNodes[i],T) << ",";
   }
+  file << (*mFunction).fR(R, T) << ",";
   file << std::endl;
   file.close();
 }

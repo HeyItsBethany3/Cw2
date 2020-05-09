@@ -73,8 +73,8 @@ void plotError(const double r, const double sigma, const int start,
 
 int main(int argc, char* argv[]) {
 
-  //plot(5,0.1,0.1,10,10);
-  plotError(0.1,0.1,4,8,1);
+  plot(5,0,0.5,6,6);
+  //plotError(0.1,0.1,4,8,1);
 
   return 0;
 }
