@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 
+
 // Constructor
 Option::Option(const double strike, const double interest, const double sigma,
       const double maturity, const double maxX,
@@ -188,7 +189,7 @@ void Option::ShowNorm() {
     sum = sum +  fabs(uApprox[i]-(*mFunction).exactU(xNodes[i], T));
   }
   sum = sqrt(sum *h);
-  std::cout << "\nGrid norm: " << sum << "\n";
+  std::cout << "\nError norm: " << sum << "\n";
 }
 
 // Retrieves max error norm
@@ -217,7 +218,7 @@ void Option::SaveInitial() {
   file << R << ",";
   file << std::endl;
 
-  // u at tiime 0
+  // u at time 0
   file << (*mFunction).payoff(0) << ",";
   for(int i=0; i<n-1; i++) {
     file << (*mFunction).payoff(xNodes[i]) << ",";

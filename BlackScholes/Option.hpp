@@ -3,6 +3,8 @@
 
 #include "AbstractFunctions.hpp"
 
+/* Class for finding the price of a European option in Q3 */
+
 class Option {
 
   public:

@@ -162,7 +162,7 @@ void Parabolic::ShowNorm() {
     sum = sum +  fabs(uApprox[i]-(*mExactU).evaluate(xNodes[i], T));
   }
   sum = sqrt(sum *h);
-  std::cout << "\nGrid norm: " << sum << "\n";
+  std::cout << "\nError norm: " << sum << "\n";
 }
 
 // Retrieves max error norm

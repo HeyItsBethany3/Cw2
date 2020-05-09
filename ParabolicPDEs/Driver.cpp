@@ -118,7 +118,7 @@ void tableError(int start, int iter, double c) {
 
     if (i>=1) {
       // Calculates difference between errors
-      file << error[i]/double(error[i-1]) << ",";
+      file << error[i-1]/double(error[i]) << ",";
     }
     file << std::endl;
   }
@@ -128,7 +128,6 @@ void tableError(int start, int iter, double c) {
   delete h;
   delete t;
 
-  system("cp ParabolicTable.csv ../../../MATLAB/");
 }
 
 

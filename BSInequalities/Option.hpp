@@ -3,6 +3,8 @@
 
 #include "AbstractFunctions.hpp"
 
+/* Class for finding the price of a American option in Q5 */
+
 class Option {
 
   public:
@@ -20,21 +22,23 @@ class Option {
     // Show matrix
     void ShowMatrix();
 
-    void FindEuropean(); // Find European approximation
+    // Find corresponding European approximation (Q3)
+    void FindEuropean();
+
+    // Find approximation for u(x,T)
     void SolveWithIter(const int iter);
 
+    void ShowApprox(); // Shows approximation for u(T,x)
+    void ShowExact(); // Shows exact value at T
+    void ShowError(); // Show absolute errors
+    void ShowNorm(); // Shows max error norm
 
-    void ShowApprox(); // Shows approximation
-    void ShowExact(); // Show exact values
-    void ShowError(); // Show errors
-    void ShowNorm(); // Shows grid function norm
-
-    double GetMaxError();
+    double GetMaxError(); // Retrieves max error norm
 
     // Save to files
-    void SaveInitial();
-    void SaveApprox();
-    void SaveFB();
+    void SaveInitial(); // Saves solution at t=0
+    void SaveApprox(); // Saves approx and exact solution at T
+    void SaveFB(); // Saves free boundary
 
 
   protected:
@@ -62,10 +66,10 @@ class Option {
     double *mUpper; // Upper diagonal
     double *mLower; // Lower diagonal
 
-    double* uApprox; // Final approximation for u
-    double* European;
-    double* FreeBoundary;
-    double* FBNotFound;
+    double* uApprox; // Final approximation for u (American option)
+    double* European; // Stores European option value
+    double* FreeBoundary; // Stores stopping times
+    double* FBNotFound; // Checks whether a stopping time has been found yet
 
 
 };
