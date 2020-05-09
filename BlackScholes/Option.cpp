@@ -20,8 +20,9 @@ Option::Option(const double strike, const double interest, const double sigma,
         l=L;
         deltaT = T/double(l); // time step-size
 
-        xNodes = new double[m];
         h = R/double(N); // spatial step-size
+        // Construct nodes
+        xNodes = new double[m];
         for(int i=0; i<m; i++) {
           xNodes[i]=(i+1)*h;
         }
@@ -30,7 +31,6 @@ Option::Option(const double strike, const double interest, const double sigma,
         mUpper = new double[m-1];
         mLower = new double[m-1];
         uApprox = new double[m];
-
 }
 
 // Destructor
@@ -67,21 +67,16 @@ void Option::ConstructMatrix() {
   }
 }
 
-
-
-// Displays system to solve
+// Displays matrix A
 void Option::ShowMatrix() {
-
   std::cout << "\nd: ";
   for (int i=0; i<=n-2; i++) {
     std::cout << mDiag[i] << " ";
   }
-
   std::cout << "\nu: ";
   for (int i=0; i<n-2; i++) {
     std::cout << mUpper[i] << " ";
   }
-
   std::cout << "\nl: ";
   for (int i=0; i<n-2; i++) {
     std::cout << mLower[i] << " ";
@@ -89,7 +84,7 @@ void Option::ShowMatrix() {
   std::cout << std::endl;
 }
 
-// Solve problem
+// Finds approximation for u(T,x)
 void Option::Approximate() {
   double t = deltaT;
 
@@ -98,9 +93,11 @@ void Option::Approximate() {
   double* uApproxNew;
   uApproxNew = new double[m];
 
+  // Use initial condition u(x,0)
   for(int j=0; j<m; j++) {
     uApproxOld[j] = (*mFunction).payoff(xNodes[j]);
   }
+  // Add boundary information (f)
   double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
   uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
   double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
@@ -109,7 +106,7 @@ void Option::Approximate() {
 
   for(int i=1; i<=l; i++) {
 
-    // Solve tridiagonal system of equations A u_n+1 = u_n
+    // Solve tridiagonal system of equations A u_n+1 = u_n + f
     double *delta;
     delta = new double[n-1];
 
@@ -131,7 +128,6 @@ void Option::Approximate() {
       uApproxNew[i] = ( uApproxOld[i] - mUpper[i]*uApproxNew[i+1] )/delta[i];
     }
 
-    // Deallocates storage
     delete delta;
 
     // Update time
@@ -141,19 +137,18 @@ void Option::Approximate() {
     for(int i=0; i<m; i++) {
       uApproxOld[i] = uApproxNew[i];
     }
+    // Add boundary information
     double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
     uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
     double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
     factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
     uApproxOld[m-1] += -(factor2 * (*mFunction).fR(R, t));
-
   }
 
   // Save uApprox
   for(int i=0; i<m; i++) {
     uApprox[i] = uApproxNew[i];
   }
-
 
   delete uApproxOld;
   delete uApproxNew;
@@ -168,6 +163,7 @@ void Option::ShowApprox() {
   std::cout << std::endl;
 }
 
+// Shows exact value at T
 void Option::ShowExact() {
   std::cout << "Exact: ";
   for(int i=0; i<m; i++) {
@@ -176,6 +172,7 @@ void Option::ShowExact() {
   std::cout << std::endl;
 }
 
+// Show absolute errors
 void Option::ShowError() {
   std::cout << "Error: ";
   for(int i=0; i<5; i++) {
@@ -184,7 +181,7 @@ void Option::ShowError() {
   std::cout << std::endl;
 }
 
-// Shows the grid norm
+// Shows max error norm
 void Option::ShowNorm() {
   double sum = 0;
   for(int i=0; i<n-1; i++) {
@@ -192,9 +189,9 @@ void Option::ShowNorm() {
   }
   sum = sqrt(sum *h);
   std::cout << "\nGrid norm: " << sum << "\n";
-
 }
 
+// Retrieves max error norm
 double Option::GetMaxError() {
   double error = 0;
   for(int i=0; i<n-1; i++) {
@@ -206,6 +203,7 @@ double Option::GetMaxError() {
   return error;
 }
 
+// Saves nodes and initial u(x,0)
 void Option::SaveInitial() {
   std::ofstream file;
   file.open("BSPlot.csv", std::ios::app);
@@ -225,6 +223,7 @@ void Option::SaveInitial() {
   file.close();
 }
 
+// Saves approximation and exact solution at T
 void Option::SaveApprox() {
   std::ofstream file;
   file.open("BSPlot.csv", std::ios::app);

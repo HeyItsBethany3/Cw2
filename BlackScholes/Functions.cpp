@@ -9,6 +9,7 @@ Functions::Functions(const double strike, const double interest, const double si
   vol = sigma;
 }
 
+// Payoff of option
 double Functions::payoff(double x) {
   double payoff;
   if (K>x) {
@@ -20,6 +21,7 @@ double Functions::payoff(double x) {
 
 }
 
+// Exact value for u(x,t)
 double Functions::exactU(double x, double t) {
   double d1 = (log(x/K)+((r+(0.5*pow(vol,2)))*t))/double(vol*sqrt(t));
   double d2 = (log(x/K)+((r-(0.5*pow(vol,2)))*t))/double(vol*sqrt(t));
@@ -28,15 +30,16 @@ double Functions::exactU(double x, double t) {
   return price;
 }
 
+// u(0,t) (Boundary function at x=0)
 double Functions::f0(double t) {
   return (K*exp(-r*t));
 }
 
+// u(R,t) (Boundary function at x=R)
 double Functions::fR(double R, double t) {
   return Functions::exactU(R, t);
 }
 
 // Destructor
 Functions::~Functions() {
-
 }

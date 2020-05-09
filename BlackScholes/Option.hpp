@@ -14,26 +14,24 @@ class Option {
     // Destructor
     ~Option();
 
-    // Construct matrix A
+    // Construct matrix A such that A u_n+1 = u_n + f
     void ConstructMatrix();
-
-    // Show matrix
+    // Show matrix A
     void ShowMatrix();
 
-    // Find approximation for u
+    // Find approximation for u(x,T)
     void Approximate();
 
+    void ShowApprox(); // Shows approximation for u(T,x)
+    void ShowExact(); // Shows exact value at T
+    void ShowError(); // Show absolute errors
+    void ShowNorm(); // Shows max error norm
 
-    void ShowApprox(); // Shows approximation
-    void ShowExact(); // Show exact values
-    void ShowError(); // Show errors
-    void ShowNorm(); // Shows grid function norm
-
-    double GetMaxError();
+    double GetMaxError(); // Retrieves max error norm
 
     // Save to files
-    void SaveInitial();
-    void SaveApprox();
+    void SaveInitial(); // Saves solution at t=0
+    void SaveApprox(); // Saves approx and exact solution at T
 
 
   protected:
@@ -60,10 +58,7 @@ class Option {
     double *mUpper; // Upper diagonal
     double *mLower; // Lower diagonal
 
-    double* uApprox; // Final approximation for u
-
-
-
+    double* uApprox; // Final approximation for u(x,T)
 };
 
 #endif

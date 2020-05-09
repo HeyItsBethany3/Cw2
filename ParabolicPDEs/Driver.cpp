@@ -5,8 +5,8 @@
 #include <cmath>
 #include <fstream>
 
-/* Creates a plot of approximation and exact solution using maturity T, 1/n
-spatial step size and 1/l time step size  */
+/* Creates a plot of approximation and exact solution using maturity T,
+spatial step size 1/n and time step size T/l */
 void plot(const double T, const int n, const int l) {
   // Always use even n and l values
   system("rm ParabolicPlot.csv");

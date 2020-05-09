@@ -3,6 +3,7 @@
 #include <cmath>
 #include <fstream>
 
+
 // Constructor
 Parabolic::Parabolic(const double A, const double time, const double g_0,
   const double g_1, Function1D& InitialU, Function2D& ExactU,
@@ -29,8 +30,7 @@ Parabolic::Parabolic(const double A, const double time, const double g_0,
     mUpper = new double[m-1];
     mLower = new double[m-1];
     uApprox = new double[m];
-
-  }
+}
 
 // Construct matrix A
 void Parabolic::constructMatrix() {
@@ -163,7 +163,6 @@ void Parabolic::ShowNorm() {
   }
   sum = sqrt(sum *h);
   std::cout << "\nGrid norm: " << sum << "\n";
-
 }
 
 // Retrieves max error norm
@@ -225,7 +224,6 @@ void Parabolic::SaveApprox() {
   file << std::endl;
   file.close();
 }
-
 
 // Destructor
 Parabolic::~Parabolic() {
