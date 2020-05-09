@@ -9,8 +9,9 @@ error = value(1:end,2);
 % Create plot
 figure(1);
 loglog(h,error,'m','LineWidth',2);
-xlabel('Step size h'); ylabel('Error norm');
-title('Grid error norm for Elliptic inequality PDE against step-size');
+xlabel('log(h)'); ylabel('log(error)');
+title('Grid error norm for Elliptic inequality PDE against step-size h');
 ax = gca; ax.FontSize = 14; axis tight;
 
-
+% Displays gradient 
+fitlm(log(h), log(error))

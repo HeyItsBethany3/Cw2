@@ -2,12 +2,12 @@
 format long;
 value = csvread('BSPlot.csv');
 
-nodes = value(1,1:end-1); 
-initU = value(2, 1:end-1);
-uT2 = value(3, 1:end-1);
-uT2Exact = value(4, 1:end-1);
-uT = value(5, 1:end-1);
-uTExact = value(6, 1:end-1);
+nodes = value(1,1:end-1); % x values
+initU = value(2, 1:end-1); % u(x,0)
+uT2 = value(3, 1:end-1); % u approximation at t=T/2
+uT2Exact = value(4, 1:end-1); % exact u at t=T/2
+uT = value(5, 1:end-1); % u approximation at t=T
+uTExact = value(6, 1:end-1); % exact u at t=T
 
 % Create plots
 figure(1);

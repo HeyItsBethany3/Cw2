@@ -48,7 +48,6 @@ void plotFB(const double T, const int n, const int l) {
   system("cp BSIneqFB.csv ../../../MATLAB/");
   delete f1;
   delete option1;
-
 }
 
 // Function prototypes
@@ -57,7 +56,7 @@ void plotFB(const double T, const int n, const int l);
 
 int main(int argc, char* argv[]) {
 
-  //plot(5,100,100);
+  plot(5,100,100);
   //plotFB(5,1000,300);
 
   return 0;
