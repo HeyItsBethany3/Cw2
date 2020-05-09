@@ -1,6 +1,7 @@
 #ifndef FUNCTION2D
 #define FUNCTION2D
 
+/* Abstract class for function with two inputs */
 
 class Function2D {
   public:

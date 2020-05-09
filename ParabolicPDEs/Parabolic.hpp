@@ -4,6 +4,8 @@
 #include "Function1D.hpp"
 #include "Function2D.hpp"
 
+/* Class for solving the Parabolic PDE problem in Q2 */
+
 class Parabolic {
 
   public:
@@ -18,22 +20,22 @@ class Parabolic {
     // Construct matrix A such that A u_n+1 = u_n
     void constructMatrix();
 
+    // Displays matrix
     void ShowMatrix();
 
+    // Solves the system to find approximation for u(T,x)
     void Approximate();
 
-    void ShowApprox();
-    void ShowExact();
-    void ShowError(); // Show errors
-    void ShowNorm(); // Shows grid norm
+    void ShowApprox(); // Shows approximation for u(T,x)
+    void ShowExact(); // Shows exact value at T
+    void ShowError(); // Show absolute errors
+    void ShowNorm(); // Shows max error norm
 
-    double GetMaxError();
+    double GetMaxError(); // Retrieves max error norm
 
     // Saving to files
-    void SaveInitial(); // saves solution at t=0
-    void SaveApprox(); // saves approx and exact solution at T
-
-
+    void SaveInitial(); // Saves solution at t=0
+    void SaveApprox(); // Saves approx and exact solution at T
 
   protected:
 

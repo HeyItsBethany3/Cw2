@@ -179,6 +179,8 @@ void Elliptic::PlotApproximation() {
   system("cp EllipticPlot.csv ../../../MATLAB/");
 }
 
+
+
 // Deallocates storage
 Elliptic::~Elliptic() {
   delete mNodes;

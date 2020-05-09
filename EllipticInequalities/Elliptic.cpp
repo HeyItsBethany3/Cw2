@@ -307,18 +307,23 @@ void Elliptic::PlotApproximation(std::string constraint) {
   assert(file.is_open());
 
   // Saves x values
+  file << 0 << ",";
   for(int i=0; i<n-1; i++) {
     file << mNodes[i] << ",";
   }
+  file << 1 << ",";
   file << std::endl;
 
   // Saves approximation
+  file << alpha << ",";
   for(int i=0; i<n-1; i++) {
     file << uApprox[i] << ",";
   }
+  file << beta << ",";
   file << std::endl;
 
   // Saves exact solution or unconstrained solution (depending on 'constraint')
+  file << alpha << ",";
   for(int i=0; i<n-1; i++) {
     if (constraint == "unconstrained") {
       file << uUnconstrained[i] << ",";
@@ -326,6 +331,7 @@ void Elliptic::PlotApproximation(std::string constraint) {
       file << uExact[i] << ",";
     }
   }
+  file << beta << ",";
 
   file.close();
   system("cp EllipticIneqPlot.csv ../../../MATLAB/");

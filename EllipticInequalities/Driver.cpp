@@ -73,8 +73,8 @@ void plotError(int start, int iter);
 int main(int argc, char* argv[]) {
 
   //plot(16, "constrained","iter", 8);
-  //plot(16, "unconstrained", "tol", 0.05);
-  plotError(8,6);
+  plot(16, "unconstrained", "tol", 0.05);
+  //plotError(8,6);
 
   return 0;
 }

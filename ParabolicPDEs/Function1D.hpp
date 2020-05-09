@@ -1,7 +1,7 @@
 #ifndef FUNCTION1D
 #define FUNCTION1D
 
-/* Class which specifies a function f(x) and its derivative f'(x) */
+/* Abstract class for function with one input */
 
 class Function1D {
   public:

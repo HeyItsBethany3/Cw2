@@ -1,6 +1,6 @@
 #include "Function1D.hpp"
 
-// This function specifies the initial condition for u in our PDE problem
+/* This class specifies the initial condition for u(0,x) in our PDE problem */
 class InitialU: public Function1D {
 
   public:
@@ -10,7 +10,7 @@ class InitialU: public Function1D {
     // Destructor
     ~InitialU();
 
-    // f(x)
+    // u(0,x)
     double evaluate(double x);
 
 };

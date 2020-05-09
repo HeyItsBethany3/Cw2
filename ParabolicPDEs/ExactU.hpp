@@ -3,7 +3,8 @@
 
 #include "Function2D.hpp"
 
-// This function specifies the exact solution for u in our PDE problem
+/* This class specifies the exact solution u(x) in the PDE problem */
+
 class ExactU: public Function2D {
 
   public:
@@ -14,9 +15,8 @@ class ExactU: public Function2D {
     // Destructor
     ~ExactU();
 
-    // f(x) (must set T before using this)
+    // u(x,T) 
     double evaluate(double x, double T);
-
 
 };
 #endif
