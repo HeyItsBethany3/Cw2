@@ -131,7 +131,7 @@ void Elliptic::SolveWithIter(const int iter) {
   delete uApproxOld;
 }
 
-// Solves problem until approximation converges
+// Solves problem until error is less than a tolerance
 void Elliptic::SolveWithTol(const double tol) {
 
   double *uApproxOld;
@@ -192,6 +192,70 @@ void Elliptic::SolveWithTol(const double tol) {
   }
 
   delete uApproxOld;
+}
+
+// Solves problem until approximation converges
+void Elliptic::SolveConvergence(const double tol) {
+  double *uApproxOld;
+  uApproxOld = new double[m];
+  for(int i=0; i<m; i++) {
+    uApproxOld[i] = (*mFunction).init(mNodes[i]);
+    uApprox[i] = (*mFunction).init(mNodes[i]);
+  }
+
+  double uVal, psi, psiVal;
+  double uDiff = 10;
+  int k=0;
+
+  // SOR method stops when the difference in iterations of SOR method is below
+  // a tolerance (current u - previous u)
+  while((uDiff >= tol)||(k>=100000)) {
+
+    // Implements SOR method
+    for(int i=0; i<m; i++) {
+
+      if (i==0) {
+        uVal = (mFvec[0]-(mUpper[0]*uApproxOld[1]))/mDiag[0];
+      } else if (i==m-1) {
+        uVal = (mFvec[m-1]-(mLower[m-2]*uApprox[m-2]))/mDiag[m-1];
+      } else {
+        uVal = (mFvec[i]-(mLower[i-1]*uApprox[i-1])-(mUpper[i]*uApproxOld[i+1]))/mDiag[i];
+      }
+      psi = (*mFunction).psi(mNodes[i]);
+
+      psiVal = (w*uVal)+((1.0-w)*uApproxOld[i]);
+
+      // Updates u values
+      if ( psi <psiVal) {
+        uApprox[i] = psi;
+      } else {
+        uApprox[i] = psiVal;
+      }
+    }
+
+    // Finds the difference in iterations for all u values and calculates the
+    // grid norm for this
+    double sum = 0;
+    for(int i=0; i<n-1; i++) {
+      sum = sum + fabs(uApprox[i]-uApproxOld[i]);
+    }
+    uDiff = sqrt(sum *h);
+    k = k+1;
+
+    // Update previous iteration
+    for (int i=0; i<m; i++) {
+      uApproxOld[i] = uApprox[i];
+    }
+
+  }
+  if (uDiff < tol) {
+    std::cout << "\nProcess finished after " << k << " iterations.\n";
+  } else {
+    std::cout << "\nApproximation did not converge.";
+  }
+
+  delete uApproxOld;
+
 }
 
 // Calculates unconstrained solution for the corresponding Q1 problem

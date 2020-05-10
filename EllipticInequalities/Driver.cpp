@@ -9,8 +9,9 @@
 void plot(const int n, std::string constraint, std::string solveMethod,
   const double parameter) {
   /* n+1 is the number of spatial mesh points
-  solveMethod can be "iter" or "tol" - specifies whether to solve the system
+  solveMethod can be "iter", "tol", "conv" - specifies whether to solve the system
   using a specific number of iterations or until the error is less than a tolerance
+  or until the approximation has converged
   constraint can be "constrained" or "unconstrained" - "constrained" plots the
   approximation against its exact solution, "unconstrained" plots it against the
   corresponding solution for Q1 (with no inequalities)
@@ -23,6 +24,8 @@ void plot(const int n, std::string constraint, std::string solveMethod,
   if (solveMethod=="iter") {
     // Solves using number of iterations
     (*PDE).SolveWithIter(parameter);
+  } if (solveMethod =="conv") {
+    (*PDE).SolveConvergence(parameter);
   } else {
     // Solves until approximation converges
     (*PDE).SolveWithTol(parameter);
@@ -49,7 +52,8 @@ void plotError(int start, int iter) {
     (*PDE).FindSystem();
     (*PDE).FindUExact();
     //(*PDE).SolveWithTol(0.05);
-    (*PDE).SolveWithIter(10e5);
+    //(*PDE).SolveWithIter(10e5);
+    (*PDE).SolveConvergence(0.000001);
 
     // Saves mesh size and grid error norm to file
     file << 1/double(n) << "," << (*PDE).GetNorm() << "," << std::endl;
@@ -86,6 +90,7 @@ void tableError(int start, int iter) {
     (*PDE).FindUExact();
     //(*PDE).SolveWithTol(0.001);
     //(*PDE).SolveWithIter(10000);
+    (*PDE).SolveConvergence(0.000001);
 
     // Store error and mesh spacing
     error[i-1] = (*PDE).GetNorm() ;
@@ -126,9 +131,9 @@ void tableError(int start, int iter);
 int main(int argc, char* argv[]) {
 
   //plot(16, "constrained","iter", 8);
-  //plot(100, "unconstrained", "tol", 0.05);
-  plotError(2,6);
-  //tableError(8,6);
+  //plot(100, "unconstrained", "conv", 0.000001);
+  //plotError(4,9);
+  //tableError(4,9);
 
   return 0;
 }

@@ -30,6 +30,7 @@ class Elliptic {
     // Solves system
     void SolveWithIter(const int iter); // Solves with number of iterations
     void SolveWithTol(const double tol); // Solves with specific tolerance
+    void SolveConvergence(const double tol); // Solves until iterations have convergend
 
     void ShowApprox(); // Show approximation to problem
     void ShowExact(); // Show exact solution
