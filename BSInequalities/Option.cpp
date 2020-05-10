@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 // Constructor
 Option::Option(const double strike, const double interest, const double sigma,
@@ -21,12 +22,12 @@ Option::Option(const double strike, const double interest, const double sigma,
         l=L;
         deltaT = T/double(l); // time step-size
 
-        h = R/double(N); // spatial step-size
-        // Construct nodes
         xNodes = new double[m];
+        h = R/double(N); // spatial step-size
         for(int i=0; i<m; i++) {
           xNodes[i]=(i+1)*h;
-          FBNotFound=0;
+          FBNotFoundT=0;
+          FBNotFoundX=0;
         }
 
         mDiag = new double[m];
@@ -34,8 +35,10 @@ Option::Option(const double strike, const double interest, const double sigma,
         mLower = new double[m-1];
         uApprox = new double[m];
         European = new double[m];
-        FreeBoundary = new double[m];
-        FBNotFound = new double[m];
+        FreeBoundaryT = new double[l];
+        FreeBoundaryX = new double[m];
+        FBNotFoundT = new double[l];
+        FBNotFoundX = new double[m];
 }
 
 // Destructor
@@ -46,8 +49,10 @@ Option::~Option() {
   delete mLower;
   delete uApprox;
   delete European;
-  delete FreeBoundary;
-  delete FBNotFound;
+  delete FreeBoundaryT;
+  delete FreeBoundaryX;
+  delete FBNotFoundT;
+  delete FBNotFoundX;
 }
 
 // Construct matrix A
@@ -75,7 +80,7 @@ void Option::ConstructMatrix() {
   }
 }
 
-// Displays matrix A
+// Displays system to solve
 void Option::ShowMatrix() {
   std::cout << "\nd: ";
   for (int i=0; i<=n-2; i++) {
@@ -92,7 +97,7 @@ void Option::ShowMatrix() {
   std::cout << std::endl;
 }
 
-// Finds European approximation
+// European approximation
 void Option::FindEuropean() {
 
   double t = deltaT;
@@ -101,11 +106,9 @@ void Option::FindEuropean() {
   double* uApproxNew;
   uApproxNew = new double[m];
 
-  // Use initial condition u(x,0)
   for(int j=0; j<m; j++) {
     uApproxOld[j] = (*mFunction).payoff(xNodes[j]);
   }
-  // Add boundary information (f)
   double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
   uApproxOld[0] += -(factor1 * (*mFunction).f0(t));
   double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
@@ -136,6 +139,7 @@ void Option::FindEuropean() {
       uApproxNew[i] = ( uApproxOld[i] - mUpper[i]*uApproxNew[i+1] )/delta[i];
     }
 
+    // Deallocates storage
     delete delta;
 
     // Update time
@@ -150,23 +154,24 @@ void Option::FindEuropean() {
     double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
     factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
     uApproxOld[m-1] += -(factor2 * (*mFunction).fR(R, t));
+
   }
 
-  // Save European approximation
+  // Save uApprox
   for(int i=0; i<m; i++) {
     European[i] = uApproxNew[i];
   }
+
   delete uApproxOld;
   delete uApproxNew;
 }
 
 
-// Finds approximation for u(T,x) (American option)
+// iter is iterations per time step
 void Option::SolveWithIter(const int iter) {
-  // iter is the number of iterations in the SOR method per time step
+
   double *uApproxOld;
   uApproxOld = new double[m];
-  // Use initial condition u(x,0)
   for(int i=0; i<m; i++) {
     uApproxOld[i] = (*mFunction).payoff(xNodes[i]);
     uApprox[i] = (*mFunction).payoff(xNodes[i]);
@@ -176,9 +181,9 @@ void Option::SolveWithIter(const int iter) {
   double* fArray;
   fArray = new double[m];
   double t = deltaT;
-
   for(int i=1; i<=l; i++) {
-    // Update f Array (add boundary information to u)
+
+    // Update f Array
     for(int i=0; i<m; i++) {
       fArray[i] = uApproxOld[i];
     }
@@ -189,8 +194,6 @@ void Option::SolveWithIter(const int iter) {
     fArray[m-1] += -(factor2 * (*mFunction).fR(R,t));
 
     for(int k=1; k<=iter; k++) {
-
-      // Implement SOR method
       for(int i=0; i<m; i++) {
 
         if (i==0) {
@@ -214,17 +217,6 @@ void Option::SolveWithIter(const int iter) {
       }
     }
 
-    // Find free boundary t value for each x
-    for(int i=0; i<m; i++) {
-      double payoff = (*mFunction).payoff(xNodes[i]);
-      if (fabs(uApprox[i]-payoff)<10e-10) {
-        FreeBoundary[i] = t; // Exercise option at this time step
-        FBNotFound[i] = 1;
-        //std::cout << "\nuApprox[i] " << uApprox[i] << " payoff " << payoff;
-        //std::cout << " fb " << FreeBoundary[i];
-      }
-    }
-
     // Update time
     t += deltaT;
 
@@ -233,15 +225,119 @@ void Option::SolveWithIter(const int iter) {
     }
   }
 
-  // If free boundary has not been set yet, set to out of range time to represent infinity
-  for(int i=0; i<m; i++) {
-    if(FBNotFound[i]==0) {
-      FreeBoundary[i]= -deltaT; // Means infinity stopping time
-    }
-  }
   delete fArray;
   delete uApproxOld;
 }
+
+// Solves problem until approximation converges
+void Option::SolveConvergence(const double tol) {
+
+  double *uApproxOld;
+  uApproxOld = new double[m];
+  for(int i=0; i<m; i++) {
+    uApproxOld[i] = (*mFunction).payoff(xNodes[i]);
+    uApprox[i] = (*mFunction).payoff(xNodes[i]);
+  }
+
+  double uVal, payoff, psiVal;
+  double* fArray;
+  fArray = new double[m];
+  double t = deltaT;
+  for(int i=1; i<=l; i++) {
+
+    // Update f Array
+    for(int i=0; i<m; i++) {
+      fArray[i] = uApproxOld[i];
+    }
+    double factor1 = -((pow(vol,2)*pow(xNodes[0],2)*deltaT)/double(2*pow(h,2)));
+    fArray[0] += -(factor1 * (*mFunction).f0(t));
+    double factor2 = -((pow(vol,2)*pow(xNodes[m-1],2)*deltaT)/double(pow(h,2)*2));
+    factor2 += -((r*xNodes[m-1]*deltaT)/double(h));
+    fArray[m-1] += -(factor2 * (*mFunction).fR(R,t));
+
+    double uDiff = 10;
+    int k=0;
+    while((uDiff >= tol)||(k>=100000)) {
+      for(int i=0; i<m; i++) {
+
+        if (i==0) {
+          uVal = (fArray[0]-(mUpper[0]*uApproxOld[1]))/mDiag[0];
+        } else if (i==m-1) {
+          uVal = (fArray[m-1]-(mLower[m-2]*uApprox[m-2]))/mDiag[m-1];
+        } else {
+          uVal = (fArray[i]-(mLower[i-1]*uApprox[i-1])-(mUpper[i]*uApproxOld[i+1]))/mDiag[i];
+        }
+        payoff = (*mFunction).payoff(xNodes[i]);
+        psiVal = (w*uVal)+((1.0-w)*uApproxOld[i]);
+
+        if ( payoff >= psiVal) {
+          uApprox[i] = payoff;
+        } else {
+          uApprox[i] = psiVal;
+        }
+      }
+
+      // Finds the difference in iterations for all u values and calculates the
+      // grid norm for this
+      double sum = 0;
+      for(int i=0; i<n-1; i++) {
+        sum = sum + fabs(uApprox[i]-uApproxOld[i]);
+      }
+      uDiff = sqrt(sum *h);
+      k = k+1;
+
+      for (int i=0; i<m; i++) {
+        uApproxOld[i] = uApprox[i];
+      }
+    }
+
+    for (int i=0; i<m; i++) {
+      fArray[i] = 0;
+    }
+
+    // Free boundary x value for each t
+    for(int i=0; i<m; i++) {
+      if(FreeBoundaryT[i]==0) {
+        double payoff = (*mFunction).payoff(xNodes[i]);
+        if (fabs(uApprox[i]-payoff)<10e-10) {
+          FreeBoundaryT[i] = xNodes[i];
+          FBNotFoundT[i] = 1;
+        }
+      }
+    }
+
+    // Find free boundary t value for each x
+    for(int i=0; i<m; i++) {
+        double payoff = (*mFunction).payoff(xNodes[i]);
+        if (fabs(uApprox[i]-payoff)<10e-10) {
+          FreeBoundaryX[i] = t; // Exercise option at this time step
+          FBNotFoundX[i] = 1;
+        }
+    }
+
+    // Update time
+    t += deltaT;
+  }
+
+  /*
+  // If free boundary has not been set yet, set to out of range time to represent infinity
+  for(int i=0; i<m; i++) {
+    if(FBNotFoundT[i]==0) {
+      FreeBoundaryT[i]= -deltaT;
+    }
+  }
+
+  for(int i=0; i<m; i++) {
+    if(FBNotFoundX[i]==0) {
+      FreeBoundaryX[i]= -deltaT;
+    }
+  }
+  */
+
+  delete fArray;
+  delete uApproxOld;
+}
+
 
 // Show approximation
 void Option::ShowApprox() {
@@ -252,7 +348,6 @@ void Option::ShowApprox() {
   std::cout << std::endl;
 }
 
-// Shows exact value at T
 void Option::ShowExact() {
   std::cout << "Exact: ";
   for(int i=0; i<m; i++) {
@@ -261,7 +356,6 @@ void Option::ShowExact() {
   std::cout << std::endl;
 }
 
-// Show absolute errors
 void Option::ShowError() {
   std::cout << "Error: ";
   for(int i=0; i<5; i++) {
@@ -270,18 +364,17 @@ void Option::ShowError() {
   std::cout << std::endl;
 }
 
-// Shows max error norm
+// Shows the grid norm
 void Option::ShowNorm() {
   double sum = 0;
   for(int i=0; i<n-1; i++) {
     sum = sum +  fabs(uApprox[i]-(*mFunction).exactU(xNodes[i], T));
   }
   sum = sqrt(sum *h);
-  std::cout << "\nError norm: " << sum << "\n";
+  std::cout << "\nGrid norm: " << sum << "\n";
 
 }
 
-// Retrieves max error norm
 double Option::GetMaxError() {
   double error = 0;
   for(int i=0; i<n-1; i++) {
@@ -293,7 +386,6 @@ double Option::GetMaxError() {
   return error;
 }
 
-// Saves nodes and initial u(x,0)
 void Option::SaveInitial() {
   std::ofstream file;
   file.open("BSIneqPlot.csv", std::ios::app);
@@ -317,7 +409,6 @@ void Option::SaveInitial() {
   file.close();
 }
 
-// Saves approximation and exact solution at T
 void Option::SaveApprox() {
   std::ofstream file;
   file.open("BSIneqPlot.csv", std::ios::app);
@@ -341,27 +432,39 @@ void Option::SaveApprox() {
   file.close();
 }
 
-// Save free boundary/stopping times
-void Option::SaveFB() {
+void Option::SaveFB(const std::string parameter) {
 
   std::ofstream file;
   file.open("BSIneqFB.csv", std::ios::app);
   assert(file.is_open());
 
-  // Approximation
-  file << 0 << ",";
-  for(int i=0; i<m; i++) {
-    file << xNodes[i] << ",";
-  }
-  file << R << ",";
-  file << std::endl;
+  if (parameter == "t") {
+    // t values
+    for(int i=1; i<=l; i++) {
+      file << deltaT*i << ",";
+    }
+    file << std::endl;
 
-  // Free boundary points
-  file << (*mFunction).f0(T) << ",";
-  for(int i=0; i<m; i++) {
-    file << FreeBoundary[i] << ",";
+    // Free boundary
+    for(int i=0; i<l; i++) {
+      file << FreeBoundaryT[i] << ",";
+    }
+    file << std::endl;
+  } else {  // "x"
+    // x values
+    for(int i=0; i<m; i++) {
+      file << xNodes[i] << ",";
+    }
+    file << std::endl;
+
+    // Free boundary
+    for(int i=0; i<m; i++) {
+      file << FreeBoundaryX[i] << ",";
+    }
+    file << std::endl;
+
   }
-  file << (*mFunction).fR(R, T) << ",";
-  file << std::endl;
+
   file.close();
+
 }

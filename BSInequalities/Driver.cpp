@@ -14,13 +14,15 @@ void plot(const double T, const int n, const int l) {
   // Approximates u at T
   Option* option1 = new Option(100, 0.05, 0.5, T, 300, 1.8, *f1, n, l);
   (*option1).ConstructMatrix();
-  (*option1).SolveWithIter(10);
+  //(*option1).SolveWithIter(100);
+  (*option1).SolveConvergence(0.00001);
   (*option1).FindEuropean();
 
   // Approximates u at T/2
   Option* option2 = new Option(100, 0.05, 0.5, T/double(2), 300, 1.8, *f1, n, l/double(2));
   (*option2).ConstructMatrix();
-  (*option2).SolveWithIter(100);
+  //(*option2).SolveWithIter(100);
+  (*option2).SolveConvergence(0.00001);
   (*option2).FindEuropean();
 
   // Saves data to a file
@@ -36,14 +38,15 @@ void plot(const double T, const int n, const int l) {
 }
 
 // Plots the free boundary/ stopping time
-void plotFB(const double T, const int n, const int l) {
+void plotFB(const double T, const int n, const int l, const std::string param) {
   system("rm BSIneqFB.csv");
 
   Functions* f1 = new Functions(100, 0.05, 0.5);
   Option* option1 = new Option(100, 0.05, 0.5, T, 300, 1.8, *f1, n, l);
   (*option1).ConstructMatrix();
-  (*option1).SolveWithIter(100);
-  (*option1).SaveFB();
+  //(*option1).SolveWithIter(100);
+  (*option1).SolveConvergence(0.00001);
+  (*option1).SaveFB(param);
 
   system("cp BSIneqFB.csv ../../../MATLAB/");
   delete f1;
@@ -52,12 +55,12 @@ void plotFB(const double T, const int n, const int l) {
 
 // Function prototypes
 void plot(const double T, const int n, const int l);
-void plotFB(const double T, const int n, const int l);
+void plotFB(const double T, const int n, const int l, const std::string param);
 
 int main(int argc, char* argv[]) {
 
-  plot(5,100,100);
-  //plotFB(5,1000,300);
+  //plot(5,100,100);
+  plotFB(5,1000,300,"x");
 
   return 0;
 }

@@ -2,6 +2,7 @@
 #define OPTIONS
 
 #include "AbstractFunctions.hpp"
+#include <string>
 
 /* Class for finding the price of a American option in Q5 */
 
@@ -28,6 +29,9 @@ class Option {
     // Find approximation for u(x,T)
     void SolveWithIter(const int iter);
 
+    // Solve until approximation converges
+    void SolveConvergence(const double tol);
+
     void ShowApprox(); // Shows approximation for u(T,x)
     void ShowExact(); // Shows exact value at T
     void ShowError(); // Show absolute errors
@@ -38,7 +42,7 @@ class Option {
     // Save to files
     void SaveInitial(); // Saves solution at t=0
     void SaveApprox(); // Saves approx and exact solution at T
-    void SaveFB(); // Saves free boundary
+    void SaveFB(const std::string parameter); // Saves free boundary
 
 
   protected:
@@ -68,8 +72,12 @@ class Option {
 
     double* uApprox; // Final approximation for u (American option)
     double* European; // Stores European option value
-    double* FreeBoundary; // Stores stopping times
-    double* FBNotFound; // Checks whether a stopping time has been found yet
+    double* FreeBoundaryT; // Stores stopping times for each t
+    double* FreeBoundaryX;
+    double* FBNotFoundT;
+    double* FBNotFoundX;
+
+    //double* FBNotFound; // Checks whether a stopping time has been found yet
 
 
 };
